@@ -1,0 +1,632 @@
+{
+  "schemaVersion": "1.0",
+  "modelVersion": 10,
+  "guardrails": [
+    {
+      "id": "GR-001",
+      "name": "No Secrets in Code",
+      "rule": "Code must not contain hard-coded secrets, API keys, or credentials.",
+      "severity": "blocking",
+      "scope": [
+        "src/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "(api[_-]?key|secret|password|access[_-]?token|client[_-]?secret)\\s*[:=]\\s*[\"'][^\"']{8,}"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Prevents credential leakage into the repository.",
+      "verification": [
+        "pattern scan",
+        "secret scan"
+      ]
+    },
+    {
+      "id": "GR-002",
+      "name": "No Client Database Access",
+      "rule": "Client and UI code must never reach the database directly.",
+      "severity": "blocking",
+      "scope": [
+        "src/client/**",
+        "src/web/**",
+        "src/ui/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "createConnection",
+        "new Pool",
+        "pg\\.",
+        "mysql2",
+        "sequelize",
+        "typeorm",
+        "prisma",
+        "mongodb://"
+      ],
+      "enforcement": [
+        "import"
+      ],
+      "reason": "Enforces the entry → service → repository → database boundary.",
+      "verification": [
+        "import validation"
+      ]
+    },
+    {
+      "id": "GR-003",
+      "name": "Authorization Before Access",
+      "rule": "Private resource access must be preceded by authorization.",
+      "severity": "warning",
+      "scope": [
+        "src/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "router\\.(get|post|put|patch|delete)\\s*\\([^)]*\\)[\\s\\S]{0,300}(?:db\\.|firestore|query\\s*\\()"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Prevents unauthorized access to data.",
+      "verification": [
+        "review"
+      ]
+    },
+    {
+      "id": "GR-004",
+      "name": "No Unsafe Dynamic Code Execution",
+      "rule": "Never eval or construct functions from untrusted input.",
+      "severity": "blocking",
+      "scope": [
+        "src/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "eval\\s*\\(",
+        "new\\s+Function\\s*\\("
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Dynamic execution of untrusted input enables RCE.",
+      "verification": [
+        "pattern scan"
+      ]
+    },
+    {
+      "id": "GR-005",
+      "name": "Parameterized Queries Only",
+      "rule": "SQL must never be assembled by string concatenation or interpolation.",
+      "severity": "blocking",
+      "scope": [
+        "src/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "(query|execute|raw|sql)\\s*\\([^)]*\\s*\\+\\s*",
+        "(query|execute|raw|sql)\\s*\\([^)]*\\$\\{"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Prevents SQL injection.",
+      "verification": [
+        "pattern scan",
+        "review"
+      ]
+    },
+    {
+      "id": "GR-006",
+      "name": "No Empty Catch Blocks",
+      "rule": "Every catch must log, wrap, or rethrow with context.",
+      "severity": "warning",
+      "scope": [
+        "src/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "catch\\s*\\([^)]*\\)\\s*\\{[\\s\\r\\n]*\\}",
+        "catch\\s*\\{[\\s\\r\\n]*\\}"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Swallowed errors make failures undiagnosable.",
+      "verification": [
+        "pattern scan"
+      ]
+    },
+    {
+      "id": "GR-007",
+      "name": "No TODO/FIXME Left in Committed Code",
+      "rule": "Committed code must not contain TODO, FIXME, or HACK markers.",
+      "severity": "warning",
+      "scope": [
+        "src/**",
+        "!**/*.test.*",
+        "!**/__tests__/**",
+        "!**/tests/**",
+        "!**/test/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "TODO\\s*[:]?",
+        "FIXME\\s*[:]?",
+        "HACK\\s*[:]?"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Unresolved markers indicate unfinished or fragile work.",
+      "verification": [
+        "pattern scan"
+      ]
+    },
+    {
+      "id": "GR-008",
+      "name": "No Console Debug Logging in Production Paths",
+      "rule": "Production code must log through the observability module, not the console.",
+      "severity": "warning",
+      "scope": [
+        "src/**",
+        "!**/*.test.*",
+        "!**/__tests__/**",
+        "!**/tests/**",
+        "!**/test/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "console\\.(log|debug)\\s*\\("
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Console logging bypasses structured, correlation-carrying logging.",
+      "verification": [
+        "pattern scan"
+      ]
+    },
+    {
+      "id": "GR-009",
+      "name": "No Explicit `any` in TypeScript",
+      "rule": "Module boundaries must be fully typed.",
+      "severity": "warning",
+      "scope": [
+        "src/**",
+        "!**/*.test.*",
+        "!**/__tests__/**",
+        "!**/tests/**",
+        "!**/test/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        ":\\s*any\\b",
+        "as\\s+any\\b",
+        "<any>"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "`any` defeats the type system and hides defects.",
+      "verification": [
+        "pattern scan",
+        "typecheck"
+      ]
+    },
+    {
+      "id": "GR-010",
+      "name": "Tests Required for New Logic",
+      "rule": "Scoped source files must have an adjacent test file.",
+      "severity": "blocking",
+      "scope": [
+        "src/**",
+        "!**/*.test.*",
+        "!**/__tests__/**",
+        "!**/tests/**",
+        "!**/test/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "test"
+      ],
+      "reason": "New logic without tests cannot be verified.",
+      "verification": [
+        "adjacent test check"
+      ]
+    },
+    {
+      "id": "GR-011",
+      "name": "No Business Logic in Entry/Controller Layer",
+      "rule": "Controllers must not import repository, persistence, or domain-model internals.",
+      "severity": "warning",
+      "scope": [
+        "src/**/api/**",
+        "src/**/controllers/**",
+        "src/**/controller/**",
+        "src/**/routes/**",
+        "src/**/adapters/http/**",
+        "src/**/web/**",
+        "src/**/ui/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "**/repositories/**",
+        "**/repository/**",
+        "**/persistence/**",
+        "**/db/**",
+        "**/data/**",
+        "**/models/**",
+        "**/domain/entities/**"
+      ],
+      "enforcement": [
+        "file-boundary"
+      ],
+      "reason": "Keeps business logic out of the HTTP layer and honors the dependency rule.",
+      "verification": [
+        "boundary validation"
+      ]
+    },
+    {
+      "id": "GR-012",
+      "name": "No Direct Filesystem Access from API Layer",
+      "rule": "The API/entry layer must not touch the filesystem directly.",
+      "severity": "warning",
+      "scope": [
+        "src/**/api/**",
+        "src/**/controllers/**",
+        "src/**/controller/**",
+        "src/**/routes/**",
+        "src/**/adapters/http/**",
+        "src/**/web/**",
+        "src/**/ui/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "node:fs",
+        "fs",
+        "fs/promises",
+        "file-system"
+      ],
+      "enforcement": [
+        "import"
+      ],
+      "reason": "Filesystem concerns belong in dedicated infrastructure adapters.",
+      "verification": [
+        "import validation"
+      ]
+    },
+    {
+      "id": "GR-013",
+      "name": "No Hardcoded URLs or Connection Strings",
+      "rule": "Environment-specific endpoints and connection strings must not be literals in code.",
+      "severity": "warning",
+      "scope": [
+        "src/**",
+        "!**/*.test.*",
+        "!**/__tests__/**",
+        "!**/tests/**",
+        "!**/test/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "(postgres|postgresql|mysql|mongodb|redis|amqp)://[^\"']*[\"']",
+        "https?://[a-z0-9.-]+\\.[a-z]{2,}[\"']"
+      ],
+      "enforcement": [
+        "pattern"
+      ],
+      "reason": "Environment-specific values belong in validated configuration.",
+      "verification": [
+        "pattern scan"
+      ]
+    },
+    {
+      "id": "GR-014",
+      "name": "Domain Layer Has No Framework Dependencies",
+      "rule": "Domain modules must not import HTTP or framework modules.",
+      "severity": "warning",
+      "scope": [
+        "src/**/domain/**",
+        "src/**/core/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "**/http/**",
+        "**/express/**",
+        "**/koa/**",
+        "**/next/**",
+        "**/api/**",
+        "**/router/**",
+        "**/react/**",
+        "**/vue/**"
+      ],
+      "enforcement": [
+        "file-boundary"
+      ],
+      "reason": "Keeps business rules framework-agnostic and testable.",
+      "verification": [
+        "boundary validation"
+      ]
+    },
+    {
+      "id": "tpl-perf-external-timeout",
+      "name": "Performance: External call timeout required",
+      "rule": "All external HTTP calls, database queries, and message queue operations must have explicit timeouts.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "fetch\\(",
+        "axios\\.get\\(",
+        "axios\\.post\\(",
+        "http\\.get\\("
+      ],
+      "enforcement": [
+        "AST scan: external call functions must include a timeout option"
+      ],
+      "reason": "Without timeouts, a single slow external service can block all threads and crash the application.",
+      "verification": [
+        "Verify all fetch, axios, and HTTP calls include a timeout parameter"
+      ]
+    },
+    {
+      "id": "tpl-sec-cors",
+      "name": "Security: CORS policy enforcement",
+      "rule": "CORS must be configured with an explicit allowlist of origins. Wildcard (*) origin is forbidden in production.",
+      "severity": "blocking",
+      "scope": [
+        "**/app.ts",
+        "**/server.ts",
+        "**/main.ts"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "origin:\\s*['\"]\\*['\"]",
+        "Access-Control-Allow-Origin:\\s*\\*"
+      ],
+      "enforcement": [
+        "Config scan: CORS configuration must not use wildcard origin"
+      ],
+      "reason": "Wildcard CORS allows any website to make authenticated requests to the API, enabling CSRF and data theft.",
+      "verification": [
+        "Verify CORS config uses an explicit origin allowlist and not *"
+      ]
+    },
+    {
+      "id": "tpl-sec-file-upload-limit",
+      "name": "Security: File upload size limit",
+      "rule": "File upload endpoints must enforce a maximum file size (≤ 10MB by default) and validate file type against an allowlist.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.controller.ts",
+        "**/upload/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Pattern scan: file upload middleware must configure limits.fileSize and limits.allowedMimeTypes"
+      ],
+      "reason": "Unlimited file uploads enable denial of service through disk exhaustion and potential malware upload.",
+      "verification": [
+        "Verify upload middleware enforces size limits and validates file types against an allowlist"
+      ]
+    },
+    {
+      "id": "tpl-sec-input-validation",
+      "name": "Security: Input validation at boundary",
+      "rule": "All external inputs (request body, query params, path params, headers) must be validated using a schema validator (Zod, Joi, class-validator) before processing.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.controller.ts",
+        "**/routes/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Pattern scan: controller/route handlers must apply validation middleware or schema checks"
+      ],
+      "reason": "Unvalidated input is the root cause of injection attacks, type confusion, and unexpected behavior.",
+      "verification": [
+        "Verify each endpoint has a validation schema applied to its input parameters"
+      ]
+    },
+    {
+      "id": "tpl-sec-rate-limiting",
+      "name": "Security: Rate limiting configuration",
+      "rule": "All public API endpoints must have rate limiting applied.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.controller.ts",
+        "**/routes/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Architecture review: global rate limiter middleware or per-route rate limits must be configured"
+      ],
+      "reason": "Without rate limiting, APIs are vulnerable to brute-force attacks, denial of service, and resource exhaustion.",
+      "verification": [
+        "Verify rate limiting middleware is applied globally or per-route"
+      ]
+    },
+    {
+      "id": "tpl-sec-xss-prevention",
+      "name": "Security: XSS prevention (output encoding)",
+      "rule": "All user-provided data rendered in HTML must be escaped. Use template engines with auto-escaping or explicit encoding functions.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.html",
+        "**/*.tsx",
+        "**/*.jsx",
+        "**/views/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "dangerouslySetInnerHTML",
+        "innerHTML\\s*=",
+        "document\\.write\\(",
+        "\\.html\\("
+      ],
+      "enforcement": [
+        "Static scan: detect dangerouslySetInnerHTML, innerHTML assignment, and document.write usage"
+      ],
+      "reason": "Unescaped user data in HTML enables cross-site scripting attacks that steal credentials and session tokens.",
+      "verification": [
+        "Verify no user input is injected into DOM without encoding"
+      ]
+    },
+    {
+      "id": "tpl-perf-connection-pool",
+      "name": "Performance: Connection pool configuration",
+      "rule": "Database connection pools must have min and max limits configured.",
+      "severity": "warning",
+      "scope": [
+        "**/database/**",
+        "**/db/**",
+        "**/prisma/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Config scan: database configuration must specify pool size limits"
+      ],
+      "reason": "Unbounded connection pools exhaust database connections under load and cause connection refused errors.",
+      "verification": [
+        "Verify database config includes connection pool min and max settings"
+      ]
+    },
+    {
+      "id": "tpl-perf-missing-index",
+      "name": "Performance: Missing index warning",
+      "rule": "Fields used in WHERE clauses, JOIN conditions, or ORDER BY must be indexed.",
+      "severity": "warning",
+      "scope": [
+        "**/prisma/schema.prisma",
+        "**/*.entity.ts",
+        "**/*.model.ts"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Schema review: fields referenced in queries must appear in database indexes"
+      ],
+      "reason": "Missing indexes cause full table scans that degrade performance linearly with data growth.",
+      "verification": [
+        "Cross-reference query WHERE/JOIN fields against schema index definitions"
+      ]
+    },
+    {
+      "id": "tpl-perf-n1-query",
+      "name": "Performance: N+1 query detection",
+      "rule": "Database queries must not be executed inside loops. Use batch queries, joins, or eager loading.",
+      "severity": "warning",
+      "scope": [
+        "**/*.service.ts",
+        "**/*.repository.ts"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "await.*prisma\\.",
+        "await.*query\\(",
+        "await.*findOne\\(",
+        "await.*findMany\\("
+      ],
+      "enforcement": [
+        "AST scan: detect database query calls inside for/while/forEach/map loops"
+      ],
+      "reason": "N+1 queries cause exponential performance degradation as data volume grows.",
+      "verification": [
+        "Identify query calls inside loop bodies and verify they are replaced with batch operations"
+      ]
+    },
+    {
+      "id": "tpl-perf-response-size",
+      "name": "Performance: Response size limits",
+      "rule": "API responses returning lists must implement pagination. Unbounded result sets are forbidden.",
+      "severity": "warning",
+      "scope": [
+        "**/*.controller.ts",
+        "**/routes/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Pattern scan: GET endpoints returning arrays must accept pagination parameters"
+      ],
+      "reason": "Unbounded responses consume excessive memory and network bandwidth, and degrade client performance.",
+      "verification": [
+        "Verify list-returning endpoints support limit/offset or cursor-based pagination"
+      ]
+    },
+    {
+      "id": "tpl-perf-unbounded-query",
+      "name": "Performance: Unbounded query warning",
+      "rule": "Database queries without LIMIT, pagination, or date range filters must be flagged for review.",
+      "severity": "warning",
+      "scope": [
+        "**/*.service.ts",
+        "**/*.repository.ts"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "findMany\\(\\{\\s*\\}\\)",
+        "findAll\\(\\)",
+        "select\\*.*from(?!.*limit)"
+      ],
+      "enforcement": [
+        "AST scan: findMany/findAll calls without take/limit/skip parameters"
+      ],
+      "reason": "Queries without bounds return unbounded result sets that grow over time and cause memory exhaustion.",
+      "verification": [
+        "Verify all data-fetching queries include limit, pagination, or date-range filters"
+      ]
+    },
+    {
+      "id": "tpl-sec-csp",
+      "name": "Security: Content Security Policy",
+      "rule": "HTML responses must include a Content-Security-Policy header or meta tag that disallows unsafe-inline and unsafe-eval.",
+      "severity": "warning",
+      "scope": [
+        "**/*.html",
+        "**/views/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "unsafe-inline",
+        "unsafe-eval"
+      ],
+      "enforcement": [
+        "Header scan: CSP header must not include unsafe-inline or unsafe-eval directives"
+      ],
+      "reason": "Unsafe-inline and unsafe-eval in CSP defeat XSS protections and allow script injection.",
+      "verification": [
+        "Verify CSP header is set and does not contain unsafe-inline or unsafe-eval"
+      ]
+    },
+    {
+      "id": "tpl-perf-batch-operations",
+      "name": "Performance: Batch database operations",
+      "rule": "Bulk inserts and updates must use batch operations (createMany, upsertMany) instead of individual inserts in loops.",
+      "severity": "advisory",
+      "scope": [
+        "**/*.service.ts",
+        "**/*.repository.ts",
+        "**/seeds/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "AST scan: detect individual insert/update calls inside loops"
+      ],
+      "reason": "Individual inserts in loops execute N separate SQL statements instead of a single batched statement.",
+      "verification": [
+        "Verify bulk data operations use createMany or equivalent batch APIs"
+      ]
+    }
+  ],
+  "updatedAt": "2026-08-17T17:31:45.586Z",
+  "basedOnCommit": null
+}

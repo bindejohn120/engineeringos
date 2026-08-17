@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.vsix
+.vscode-test/
+*.log
+.DS_Store
+.engineeringos/generated/
+.engineeringos/snapshots/
+.engineeringos/sessions/
+.vscode/launch.json

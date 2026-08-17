@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "engineeringos-extension",
+  "projectName": "EngineeringOS",
+  "workspacePath": "C:\\Users\\millioncoder\\Desktop\\extension",
+  "createdAt": "2026-08-17T17:31:45.438Z",
+  "updatedAt": "2026-08-17T17:31:45.554Z",
+  "analysis": {
+    "enabled": true,
+    "watchFiles": true,
+    "watchGit": true
+  },
+  "ai": {
+    "provider": "none",
+    "contextMode": "minimal-relevant",
+    "enabled": false
+  }
+}

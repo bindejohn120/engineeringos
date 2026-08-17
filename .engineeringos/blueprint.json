@@ -1,0 +1,233 @@
+{
+  "schemaVersion": "1.0",
+  "modelVersion": 19,
+  "updatedAt": "2026-08-17T17:31:45.597Z",
+  "basedOnCommit": null,
+  "projectId": "engineeringos-extension",
+  "projectName": "EngineeringOS",
+  "version": "1.0",
+  "summary": "Engineering blueprint for EngineeringOS: a clean architecture system delivering map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification to developers, tech leads and AI coding agents. Comprises 17 framework sections that an AI coding agent must follow before, during, and after building.",
+  "architectureStyle": "clean-architecture",
+  "securityLevel": "hardened",
+  "techStack": {
+    "language": "TypeScript",
+    "runtime": "Node.js",
+    "framework": "VS Code Extension API",
+    "database": "JSON artifacts"
+  },
+  "sections": [
+    {
+      "id": "mission",
+      "title": "Engineering Mission & Success Criteria",
+      "purpose": "Defines why EngineeringOS exists and how its engineering will be judged.",
+      "directives": [
+        "Deliver a production-grade EngineeringOS that provides map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification to developers, tech leads and AI coding agents.",
+        "The system MUST be secure, organized, scalable, maintainable, and predictable — built to a senior/principal engineering bar.",
+        "Every feature MUST ship with tests, observable behavior, and evidence that invariants still hold.",
+        "The codebase MUST remain comprehensible to a new engineer within one day of onboarding."
+      ]
+    },
+    {
+      "id": "system-context",
+      "title": "System Context & Boundaries",
+      "purpose": "Establishes what is inside the system, what is outside, and how they interact.",
+      "directives": [
+        "Primary users: developers, tech leads and AI coding agents.",
+        "Critical capabilities (in scope): map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification.",
+        "Every capability MUST map to at least one component and one workflow in the Engineering Map.",
+        "Out-of-scope capabilities MUST be explicit (no silent scope creep) — record them as rejected requirements or unknowns.",
+        "System purpose: Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails."
+      ]
+    },
+    {
+      "id": "non-negotiables",
+      "title": "Non-Negotiable Engineering Constraints",
+      "purpose": "Hard constraints the AI agent cannot violate, enforced by EngineeringOS guardrails.",
+      "directives": [
+        "No secrets in code; configuration MUST come from validated environment variables.",
+        "Client/entry code MUST NOT access the database directly — enforce the boundary with file-boundary guardrails.",
+        "All state-changing operations MUST be idempotent or safe to retry.",
+        "No empty catch blocks; errors MUST be typed, logged, and handled or deliberately rethrown.",
+        "No `any`, no untyped boundaries, no dead code, no TODO/FIXME left in committed code.",
+        "New behavior MUST be covered by automated tests before it is considered done."
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture & Layering (clean-architecture)",
+      "purpose": "Defines the clean-architecture structure the AI agent MUST build within.",
+      "directives": [
+        "Layers: adapters (http, persistence, external) → use cases (application) → domain entities → interfaces.",
+        "Domain MUST have zero dependencies on frameworks, databases, or HTTP.",
+        "Use cases orchestrate domain logic; adapters implement the interfaces; dependency inversion at every boundary.",
+        "Everything outside the domain is a plugin — replaceable without touching business rules."
+      ]
+    },
+    {
+      "id": "module-boundaries",
+      "title": "Module Boundaries & Dependency Rules",
+      "purpose": "Prevents the \"big ball of mud\" and keeps dependency direction predictable.",
+      "directives": [
+        "Dependencies MUST point inward: entry/API → application/domain → repository → infrastructure. Never the reverse.",
+        "Cross-module communication MUST go through explicit interfaces, never shared mutable singletons.",
+        "No cycles between modules — the Engineering Map MUST remain a DAG; detect and break cycles immediately.",
+        "Each module MUST own its data and expose a minimal public surface; everything else is private.",
+        "Business logic MUST live in domain/application modules, NOT in controllers, routes, or UI code."
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data Architecture & Integrity",
+      "purpose": "Governs how data is stored, validated, migrated, and kept consistent.",
+      "directives": [
+        "Every capability persists through a repository owned by its module (store: JSON artifacts).",
+        "Data validation MUST happen at the boundary: schemas at entry, invariants in the domain, constraints in storage.",
+        "All schema changes MUST be versioned migrations; no ad-hoc DDL in application code.",
+        "Transactions MUST be used for multi-step writes; no partial-state commits.",
+        "Soft-delete or audit columns MUST be present for security-relevant entities.",
+        "Indexes MUST cover the primary query paths; N+1 queries are a review-blocking defect."
+      ]
+    },
+    {
+      "id": "api-design",
+      "title": "API Design Contract",
+      "purpose": "Defines a predictable, versioned API surface for both UI and external consumers.",
+      "directives": [
+        "REST-style, resource-oriented endpoints with consistent plural nouns and HTTP verbs.",
+        "APIs MUST be versioned and backward-compatible; breaking changes require a new version.",
+        "Every request MUST be validated before touching business logic; malformed input returns a structured 4xx.",
+        "Error responses MUST follow one envelope (code, message, requestId) — never leak stack traces.",
+        "State-changing endpoints MUST accept idempotency keys and return consistent responses on retry.",
+        "Pagination, filtering, and field selection MUST be explicit for list endpoints."
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Security Posture (hardened)",
+      "purpose": "The security requirements applied to every line of code the agent writes.",
+      "directives": [
+        "No secrets, keys, or credentials in code — use validated environment variables and a secret manager.",
+        "Parameterized queries / ORM bindings ONLY; never concatenate user input into SQL or shell.",
+        "Never `eval` or execute untrusted input; no dynamic code from user payloads.",
+        "Every endpoint MUST authenticate and authorize; default-deny.",
+        "Input validation at every boundary; enforce size limits and reject malformed payloads.",
+        "Use TLS everywhere; never downgrade transport for convenience.",
+        "Defend against OWASP Top 10: injection, broken auth, sensitive data exposure, XXE, SSRF, insecure deserialization.",
+        "All secrets MUST be injected at deploy time; never commit, log, or echo them.",
+        "Requests MUST carry explicit authentication and authorization; default-deny on every endpoint.",
+        "Security review MUST be part of the Definition of Done for any change touching auth, payments, or personal data."
+      ]
+    },
+    {
+      "id": "error-handling",
+      "title": "Error Handling Strategy",
+      "purpose": "Makes failures predictable, diagnosable, and recoverable.",
+      "directives": [
+        "Fail fast and loud: validate inputs and assumptions at the boundary; never guess around bad data.",
+        "Use typed errors/result types; the caller decides recovery — no exceptions for expected control flow.",
+        "No empty catches; every catch MUST log, wrap, or rethrow with context.",
+        "External system failures MUST be mapped to retryable vs non-retryable and handled accordingly.",
+        "A single error taxonomy MUST be shared across the app so UI and APIs speak the same failure language."
+      ]
+    },
+    {
+      "id": "observability",
+      "title": "Observability, Logging & Tracing",
+      "purpose": "Ensures the system can be diagnosed in production without guesswork.",
+      "directives": [
+        "Structured, machine-readable logs ONLY via the logging module — no `console.log` in production paths.",
+        "Every log line MUST carry correlation/trace context and be PII-safe.",
+        "Critical flows MUST emit metrics (latency, error rate, saturation) and traces across module boundaries.",
+        "Health, readiness, and dependency liveness endpoints MUST exist.",
+        "Alerting MUST cover BLOCKING invariants, not noise: alert on user impact and resource exhaustion."
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing Strategy & Gates",
+      "purpose": "Defines the quality gates that separate \"works locally\" from \"safe to merge\".",
+      "directives": [
+        "Unit tests for domain logic (fast, deterministic, no I/O).",
+        "Integration tests across boundaries with real repositories/external stubs.",
+        "An EngineeringOS invariant MUST map to at least one automated test.",
+        "Coverage gate: critical paths MUST be covered; untested code MUST NOT be called \"done\".",
+        "CI MUST run lint, typecheck, tests, build, and EngineeringOS verification on every PR."
+      ]
+    },
+    {
+      "id": "performance",
+      "title": "Performance, Scalability & Reliability",
+      "purpose": "Keeps the system fast under load and resilient to failure.",
+      "directives": [
+        "Define latency budgets per workflow; paginate and stream rather than loading all data.",
+        "Cache read-heavy paths with explicit invalidation; never cache sensitive/personal data carelessly.",
+        "External calls MUST have timeouts, retries with backoff, and circuit breakers.",
+        "State is safe under concurrency: atomic operations or optimistic locking; no lost updates.",
+        "Scale-out paths MUST be stateless; mutable state lives in stores, not in process memory."
+      ]
+    },
+    {
+      "id": "maintainability",
+      "title": "Maintainability & Code Standards",
+      "purpose": "Keeps the codebase organized, consistent, and predictable as it grows.",
+      "directives": [
+        "Directory layout MUST mirror the clean-architecture layers; names are descriptive and consistent.",
+        "Small, single-purpose functions and modules; DRY within a module, explicit interfaces across modules.",
+        "No magic values: constants with names; no floating literals in business logic.",
+        "Code review is mandatory; every PR MUST pass the review checklist in the Definition of Done.",
+        "Document public APIs and non-obvious decisions inline or in ADRs; keep documentation close to code."
+      ]
+    },
+    {
+      "id": "cicd",
+      "title": "Delivery & CI/CD",
+      "purpose": "Defines the pipeline from commit to production.",
+      "directives": [
+        "Environments: development, staging, production — parity of config and data handling.",
+        "CI gates: lint → typecheck → tests → build → package → EngineeringOS verification.",
+        "Deploys MUST be repeatable, immutable artifacts (no manual server edits).",
+        "Rollback MUST be one action, with the previous artifact kept and restored automatically.",
+        "Feature flags for risky rollouts; canary/blue-green for services with high blast radius."
+      ]
+    },
+    {
+      "id": "verification",
+      "title": "EngineeringOS Verification & Evidence Loop",
+      "purpose": "How the agent stays in sync with the model while building.",
+      "directives": [
+        "Before writing code, load the Engineering Map, Mental Model, Guardrails, and this Blueprint.",
+        "After each change, run `engineeringos.verify` and resolve every BLOCKING finding before continuing.",
+        "Record implemented requirements with test evidence so drift detection stays green.",
+        "Update map.json/mental-model.json when reality diverges — the model is the source of truth the agent plans from.",
+        "Never silence a guardrail finding; fix the root cause or justify a documented, reviewed exception."
+      ]
+    },
+    {
+      "id": "definition-of-done",
+      "title": "Definition of Done",
+      "purpose": "The checklist every task must satisfy before it is considered complete.",
+      "directives": [
+        "Code exists in the mapped module, follows the dependency rule, and passes lint + typecheck.",
+        "All affected requirements and invariants are implemented and covered by automated tests.",
+        "No security guardrail is violated; secrets and credentials are never in code.",
+        "Errors are handled per the error taxonomy; behavior is observable via logs/metrics.",
+        "EngineeringOS verification reports no BLOCKING findings for the change.",
+        "The model is updated (components, requirements, evidence) to reflect the change."
+      ]
+    },
+    {
+      "id": "roadmap",
+      "title": "Phased Roadmap",
+      "purpose": "Sequencing so the agent builds in dependency order rather than feature-by-feature in a vacuum.",
+      "directives": [
+        "Phase 0 — Foundations: project skeleton, config, logging, errors, CI, and the mapped directory layout.",
+        "Phase 1 — Data layer: migrations, repositories, and stores for each capability.",
+        "Phase 2 — Domain: business rules, invariants, and workflows for each capability (in criticality order).",
+        "Phase 3 — API & integration: endpoints, auth, validation, and external system adapters.",
+        "Phase 4 — Hardening: load/security/reliability passes, observability, and the remaining invariants.",
+        "Every phase ends with a green EngineeringOS verification and updated model evidence."
+      ]
+    }
+  ],
+  "generatedAt": "2026-08-17T17:31:45.438Z"
+}

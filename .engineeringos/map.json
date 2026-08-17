@@ -1,0 +1,1507 @@
+{
+  "schemaVersion": "1.0",
+  "modelVersion": 10,
+  "updatedAt": "2026-08-17T17:31:45.568Z",
+  "basedOnCommit": null,
+  "project": {
+    "id": "engineeringos-extension",
+    "name": "EngineeringOS",
+    "purpose": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails."
+  },
+  "actors": [
+    {
+      "id": "actor-developers",
+      "name": "developers",
+      "description": "Developers using EngineeringOS.",
+      "interactions": [
+        "map generation",
+        "mental model generation",
+        "guardrail enforcement",
+        "context retrieval",
+        "drift detection",
+        "impact analysis",
+        "verification"
+      ]
+    },
+    {
+      "id": "actor-tech-leads",
+      "name": "tech leads",
+      "description": "Tech Leads using EngineeringOS.",
+      "interactions": [
+        "map generation",
+        "mental model generation",
+        "guardrail enforcement",
+        "context retrieval",
+        "drift detection",
+        "impact analysis",
+        "verification"
+      ]
+    },
+    {
+      "id": "actor-ai-coding-agents",
+      "name": "AI coding agents",
+      "description": "AI Coding Agents using EngineeringOS.",
+      "interactions": [
+        "map generation",
+        "mental model generation",
+        "guardrail enforcement",
+        "context retrieval",
+        "drift detection",
+        "impact analysis",
+        "verification"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-001",
+      "text": "The system MUST support map generation end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-map-generation"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-002",
+      "text": "The system MUST support mental model generation end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-mental-model-generation"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-003",
+      "text": "The system MUST support guardrail enforcement end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-guardrail-enforcement"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-004",
+      "text": "The system MUST support context retrieval end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-context-retrieval"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-005",
+      "text": "The system MUST support drift detection end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-drift-detection"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-006",
+      "text": "The system MUST support impact analysis end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-impact-analysis"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-007",
+      "text": "The system MUST support verification end to end.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-verification"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-008",
+      "text": "Every request MUST be authenticated and authorized before reaching business logic.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "api",
+        "authn"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-009",
+      "text": "State-changing operations MUST be idempotent or safe to retry.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-010",
+      "text": "No secrets or credentials MAY be committed to the repository.",
+      "source": "inferred",
+      "priority": "critical",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "config"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-011",
+      "text": "All components MUST emit structured, correlation-carrying logs.",
+      "source": "inferred",
+      "priority": "high",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "observability",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ]
+    },
+    {
+      "schemaVersion": "1.0",
+      "modelVersion": 0,
+      "id": "REQ-012",
+      "text": "Every invariant and critical workflow MUST be covered by automated tests.",
+      "source": "inferred",
+      "priority": "high",
+      "status": "open",
+      "evidence": [],
+      "affectedComponents": [
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "api",
+      "name": "API Gateway & Entry",
+      "purpose": "Exposes EngineeringOS capabilities over a validated, versioned, authorized API.",
+      "responsibilities": [
+        "Validate and authorize every request",
+        "Shape responses and error envelopes",
+        "Route to application services"
+      ],
+      "inputs": [
+        "inbound HTTP requests"
+      ],
+      "outputs": [
+        "validated, authorized calls into application services"
+      ],
+      "dependencies": [
+        "authn",
+        "config",
+        "observability",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "dependents": [],
+      "interfaces": [
+        "REST endpoints"
+      ],
+      "failureModes": [
+        "Input flood / rate exhaustion",
+        "Auth misconfiguration"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "authn",
+      "name": "Authentication & Authorization",
+      "purpose": "Authenticates principals and authorizes every access decision with least privilege.",
+      "responsibilities": [
+        "Issue and verify credentials",
+        "Enforce default-deny authorization",
+        "Provide principal context to services"
+      ],
+      "inputs": [
+        "credentials / sessions / tokens"
+      ],
+      "outputs": [
+        "authorized principal context"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "authenticate()",
+        "authorize(principal, action)"
+      ],
+      "failureModes": [
+        "Auth bypass",
+        "Token leakage"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "config",
+      "name": "Configuration",
+      "purpose": "Validates and provides environment-driven configuration at startup.",
+      "responsibilities": [
+        "Load and validate configuration from environment",
+        "Reject missing or malformed required settings",
+        "Never expose secrets"
+      ],
+      "inputs": [
+        "environment variables"
+      ],
+      "outputs": [
+        "validated typed configuration"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "get(section, key)"
+      ],
+      "failureModes": [
+        "Misconfiguration at boot"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "observability",
+      "name": "Observability & Logging",
+      "purpose": "Structured logging, metrics, and traces for every component.",
+      "responsibilities": [
+        "Emit structured correlation-carrying logs",
+        "Publish metrics for critical flows",
+        "Support health and readiness checks"
+      ],
+      "inputs": [
+        "structured events from components"
+      ],
+      "outputs": [
+        "logs, metrics, traces, health endpoints"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "api",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "interfaces": [
+        "log(event)",
+        "metric(name, value)",
+        "tracer"
+      ],
+      "failureModes": [
+        "Log volume / cost spikes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-map-generation",
+      "name": "Map Generation Service",
+      "purpose": "Implements the map generation capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate map generation workflows",
+        "Enforce business rules and invariants",
+        "Publish map generation results to callers"
+      ],
+      "inputs": [
+        "Map Generation requests"
+      ],
+      "outputs": [
+        "Map Generation results and events"
+      ],
+      "dependencies": [
+        "data-map-generation",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleMapGeneration()"
+      ],
+      "failureModes": [
+        "Map Generation business rule violation",
+        "Map Generation data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-map-generation",
+      "name": "Map Generation Repository",
+      "purpose": "Owns persistence for map generation entities behind the Map Generation service.",
+      "responsibilities": [
+        "Persist and query map generation entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Map Generation entity commands"
+      ],
+      "outputs": [
+        "Map Generation entity reads"
+      ],
+      "dependencies": [
+        "store-map-generation"
+      ],
+      "dependents": [
+        "app-map-generation"
+      ],
+      "interfaces": [
+        "map-generationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-map-generation",
+      "name": "Map Generation Data Store",
+      "purpose": "Persistent storage for map generation data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Map Generation writes"
+      ],
+      "outputs": [
+        "Map Generation reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-map-generation"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-mental-model-generation",
+      "name": "Mental Model Generation Service",
+      "purpose": "Implements the mental model generation capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate mental model generation workflows",
+        "Enforce business rules and invariants",
+        "Publish mental model generation results to callers"
+      ],
+      "inputs": [
+        "Mental Model Generation requests"
+      ],
+      "outputs": [
+        "Mental Model Generation results and events"
+      ],
+      "dependencies": [
+        "data-mental-model-generation",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleMentalModelGeneration()"
+      ],
+      "failureModes": [
+        "Mental Model Generation business rule violation",
+        "Mental Model Generation data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-mental-model-generation",
+      "name": "Mental Model Generation Repository",
+      "purpose": "Owns persistence for mental model generation entities behind the Mental Model Generation service.",
+      "responsibilities": [
+        "Persist and query mental model generation entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Mental Model Generation entity commands"
+      ],
+      "outputs": [
+        "Mental Model Generation entity reads"
+      ],
+      "dependencies": [
+        "store-mental-model-generation"
+      ],
+      "dependents": [
+        "app-mental-model-generation"
+      ],
+      "interfaces": [
+        "mental-model-generationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-mental-model-generation",
+      "name": "Mental Model Generation Data Store",
+      "purpose": "Persistent storage for mental model generation data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Mental Model Generation writes"
+      ],
+      "outputs": [
+        "Mental Model Generation reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-mental-model-generation"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-guardrail-enforcement",
+      "name": "Guardrail Enforcement Service",
+      "purpose": "Implements the guardrail enforcement capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate guardrail enforcement workflows",
+        "Enforce business rules and invariants",
+        "Publish guardrail enforcement results to callers"
+      ],
+      "inputs": [
+        "Guardrail Enforcement requests"
+      ],
+      "outputs": [
+        "Guardrail Enforcement results and events"
+      ],
+      "dependencies": [
+        "data-guardrail-enforcement",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleGuardrailEnforcement()"
+      ],
+      "failureModes": [
+        "Guardrail Enforcement business rule violation",
+        "Guardrail Enforcement data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-guardrail-enforcement",
+      "name": "Guardrail Enforcement Repository",
+      "purpose": "Owns persistence for guardrail enforcement entities behind the Guardrail Enforcement service.",
+      "responsibilities": [
+        "Persist and query guardrail enforcement entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Guardrail Enforcement entity commands"
+      ],
+      "outputs": [
+        "Guardrail Enforcement entity reads"
+      ],
+      "dependencies": [
+        "store-guardrail-enforcement"
+      ],
+      "dependents": [
+        "app-guardrail-enforcement"
+      ],
+      "interfaces": [
+        "guardrail-enforcementRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-guardrail-enforcement",
+      "name": "Guardrail Enforcement Data Store",
+      "purpose": "Persistent storage for guardrail enforcement data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Guardrail Enforcement writes"
+      ],
+      "outputs": [
+        "Guardrail Enforcement reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-guardrail-enforcement"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-context-retrieval",
+      "name": "Context Retrieval Service",
+      "purpose": "Implements the context retrieval capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate context retrieval workflows",
+        "Enforce business rules and invariants",
+        "Publish context retrieval results to callers"
+      ],
+      "inputs": [
+        "Context Retrieval requests"
+      ],
+      "outputs": [
+        "Context Retrieval results and events"
+      ],
+      "dependencies": [
+        "data-context-retrieval",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleContextRetrieval()"
+      ],
+      "failureModes": [
+        "Context Retrieval business rule violation",
+        "Context Retrieval data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-context-retrieval",
+      "name": "Context Retrieval Repository",
+      "purpose": "Owns persistence for context retrieval entities behind the Context Retrieval service.",
+      "responsibilities": [
+        "Persist and query context retrieval entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Context Retrieval entity commands"
+      ],
+      "outputs": [
+        "Context Retrieval entity reads"
+      ],
+      "dependencies": [
+        "store-context-retrieval"
+      ],
+      "dependents": [
+        "app-context-retrieval"
+      ],
+      "interfaces": [
+        "context-retrievalRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-context-retrieval",
+      "name": "Context Retrieval Data Store",
+      "purpose": "Persistent storage for context retrieval data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Context Retrieval writes"
+      ],
+      "outputs": [
+        "Context Retrieval reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-context-retrieval"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-drift-detection",
+      "name": "Drift Detection Service",
+      "purpose": "Implements the drift detection capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate drift detection workflows",
+        "Enforce business rules and invariants",
+        "Publish drift detection results to callers"
+      ],
+      "inputs": [
+        "Drift Detection requests"
+      ],
+      "outputs": [
+        "Drift Detection results and events"
+      ],
+      "dependencies": [
+        "data-drift-detection",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleDriftDetection()"
+      ],
+      "failureModes": [
+        "Drift Detection business rule violation",
+        "Drift Detection data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-drift-detection",
+      "name": "Drift Detection Repository",
+      "purpose": "Owns persistence for drift detection entities behind the Drift Detection service.",
+      "responsibilities": [
+        "Persist and query drift detection entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Drift Detection entity commands"
+      ],
+      "outputs": [
+        "Drift Detection entity reads"
+      ],
+      "dependencies": [
+        "store-drift-detection"
+      ],
+      "dependents": [
+        "app-drift-detection"
+      ],
+      "interfaces": [
+        "drift-detectionRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-drift-detection",
+      "name": "Drift Detection Data Store",
+      "purpose": "Persistent storage for drift detection data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Drift Detection writes"
+      ],
+      "outputs": [
+        "Drift Detection reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-drift-detection"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-impact-analysis",
+      "name": "Impact Analysis Service",
+      "purpose": "Implements the impact analysis capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate impact analysis workflows",
+        "Enforce business rules and invariants",
+        "Publish impact analysis results to callers"
+      ],
+      "inputs": [
+        "Impact Analysis requests"
+      ],
+      "outputs": [
+        "Impact Analysis results and events"
+      ],
+      "dependencies": [
+        "data-impact-analysis",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleImpactAnalysis()"
+      ],
+      "failureModes": [
+        "Impact Analysis business rule violation",
+        "Impact Analysis data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-impact-analysis",
+      "name": "Impact Analysis Repository",
+      "purpose": "Owns persistence for impact analysis entities behind the Impact Analysis service.",
+      "responsibilities": [
+        "Persist and query impact analysis entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Impact Analysis entity commands"
+      ],
+      "outputs": [
+        "Impact Analysis entity reads"
+      ],
+      "dependencies": [
+        "store-impact-analysis"
+      ],
+      "dependents": [
+        "app-impact-analysis"
+      ],
+      "interfaces": [
+        "impact-analysisRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-impact-analysis",
+      "name": "Impact Analysis Data Store",
+      "purpose": "Persistent storage for impact analysis data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Impact Analysis writes"
+      ],
+      "outputs": [
+        "Impact Analysis reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-impact-analysis"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "app-verification",
+      "name": "Verification Service",
+      "purpose": "Implements the verification capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate verification workflows",
+        "Enforce business rules and invariants",
+        "Publish verification results to callers"
+      ],
+      "inputs": [
+        "Verification requests"
+      ],
+      "outputs": [
+        "Verification results and events"
+      ],
+      "dependencies": [
+        "data-verification",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleVerification()"
+      ],
+      "failureModes": [
+        "Verification business rule violation",
+        "Verification data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-verification",
+      "name": "Verification Repository",
+      "purpose": "Owns persistence for verification entities behind the Verification service.",
+      "responsibilities": [
+        "Persist and query verification entities",
+        "Map domain objects to storage",
+        "Keep storage access out of business logic"
+      ],
+      "inputs": [
+        "Verification entity commands"
+      ],
+      "outputs": [
+        "Verification entity reads"
+      ],
+      "dependencies": [
+        "store-verification"
+      ],
+      "dependents": [
+        "app-verification"
+      ],
+      "interfaces": [
+        "verificationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-verification",
+      "name": "Verification Data Store",
+      "purpose": "Persistent storage for verification data.",
+      "responsibilities": [
+        "Store and index entity data",
+        "Enforce referential integrity"
+      ],
+      "inputs": [
+        "Verification writes"
+      ],
+      "outputs": [
+        "Verification reads"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "data-verification"
+      ],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    }
+  ],
+  "services": [],
+  "dataStores": [
+    {
+      "id": "store-map-generation",
+      "name": "Map Generation Data Store",
+      "purpose": "Persistent storage for map generation data.",
+      "tables": [
+        "map-generation_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-mental-model-generation",
+      "name": "Mental Model Generation Data Store",
+      "purpose": "Persistent storage for mental model generation data.",
+      "tables": [
+        "mental-model-generation_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-guardrail-enforcement",
+      "name": "Guardrail Enforcement Data Store",
+      "purpose": "Persistent storage for guardrail enforcement data.",
+      "tables": [
+        "guardrail-enforcement_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-context-retrieval",
+      "name": "Context Retrieval Data Store",
+      "purpose": "Persistent storage for context retrieval data.",
+      "tables": [
+        "context-retrieval_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-drift-detection",
+      "name": "Drift Detection Data Store",
+      "purpose": "Persistent storage for drift detection data.",
+      "tables": [
+        "drift-detection_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-impact-analysis",
+      "name": "Impact Analysis Data Store",
+      "purpose": "Persistent storage for impact analysis data.",
+      "tables": [
+        "impact-analysis_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "store-verification",
+      "name": "Verification Data Store",
+      "purpose": "Persistent storage for verification data.",
+      "tables": [
+        "verification_records"
+      ],
+      "dependencies": [],
+      "dependents": [],
+      "interfaces": [
+        "SQL/query interface"
+      ],
+      "failureModes": [
+        "Store outage",
+        "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    }
+  ],
+  "externalSystems": [],
+  "relationships": [
+    {
+      "id": "rel-api-authn",
+      "from": "api",
+      "to": "authn",
+      "type": "uses",
+      "description": "Entry layer authenticates and authorizes requests."
+    },
+    {
+      "id": "rel-api-config",
+      "from": "api",
+      "to": "config",
+      "type": "uses",
+      "description": "Entry layer reads validated configuration."
+    },
+    {
+      "id": "rel-api-observability",
+      "from": "api",
+      "to": "observability",
+      "type": "uses",
+      "description": "Entry layer emits structured logs and metrics."
+    },
+    {
+      "id": "rel-api-app-map-generation",
+      "from": "api",
+      "to": "app-map-generation",
+      "type": "invokes",
+      "description": "Entry layer delegates map generation work to the application service."
+    },
+    {
+      "id": "rel-app-map-generation-data-map-generation",
+      "from": "app-map-generation",
+      "to": "data-map-generation",
+      "type": "persists-through",
+      "description": "map generation service owns data through its repository."
+    },
+    {
+      "id": "rel-data-map-generation-store-map-generation",
+      "from": "data-map-generation",
+      "to": "store-map-generation",
+      "type": "writes",
+      "description": "Repository persists map generation data to its store."
+    },
+    {
+      "id": "rel-app-map-generation-observability",
+      "from": "app-map-generation",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "map generation service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-mental-model-generation",
+      "from": "api",
+      "to": "app-mental-model-generation",
+      "type": "invokes",
+      "description": "Entry layer delegates mental model generation work to the application service."
+    },
+    {
+      "id": "rel-app-mental-model-generation-data-mental-model-generation",
+      "from": "app-mental-model-generation",
+      "to": "data-mental-model-generation",
+      "type": "persists-through",
+      "description": "mental model generation service owns data through its repository."
+    },
+    {
+      "id": "rel-data-mental-model-generation-store-mental-model-generation",
+      "from": "data-mental-model-generation",
+      "to": "store-mental-model-generation",
+      "type": "writes",
+      "description": "Repository persists mental model generation data to its store."
+    },
+    {
+      "id": "rel-app-mental-model-generation-observability",
+      "from": "app-mental-model-generation",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "mental model generation service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-guardrail-enforcement",
+      "from": "api",
+      "to": "app-guardrail-enforcement",
+      "type": "invokes",
+      "description": "Entry layer delegates guardrail enforcement work to the application service."
+    },
+    {
+      "id": "rel-app-guardrail-enforcement-data-guardrail-enforcement",
+      "from": "app-guardrail-enforcement",
+      "to": "data-guardrail-enforcement",
+      "type": "persists-through",
+      "description": "guardrail enforcement service owns data through its repository."
+    },
+    {
+      "id": "rel-data-guardrail-enforcement-store-guardrail-enforcement",
+      "from": "data-guardrail-enforcement",
+      "to": "store-guardrail-enforcement",
+      "type": "writes",
+      "description": "Repository persists guardrail enforcement data to its store."
+    },
+    {
+      "id": "rel-app-guardrail-enforcement-observability",
+      "from": "app-guardrail-enforcement",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "guardrail enforcement service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-context-retrieval",
+      "from": "api",
+      "to": "app-context-retrieval",
+      "type": "invokes",
+      "description": "Entry layer delegates context retrieval work to the application service."
+    },
+    {
+      "id": "rel-app-context-retrieval-data-context-retrieval",
+      "from": "app-context-retrieval",
+      "to": "data-context-retrieval",
+      "type": "persists-through",
+      "description": "context retrieval service owns data through its repository."
+    },
+    {
+      "id": "rel-data-context-retrieval-store-context-retrieval",
+      "from": "data-context-retrieval",
+      "to": "store-context-retrieval",
+      "type": "writes",
+      "description": "Repository persists context retrieval data to its store."
+    },
+    {
+      "id": "rel-app-context-retrieval-observability",
+      "from": "app-context-retrieval",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "context retrieval service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-drift-detection",
+      "from": "api",
+      "to": "app-drift-detection",
+      "type": "invokes",
+      "description": "Entry layer delegates drift detection work to the application service."
+    },
+    {
+      "id": "rel-app-drift-detection-data-drift-detection",
+      "from": "app-drift-detection",
+      "to": "data-drift-detection",
+      "type": "persists-through",
+      "description": "drift detection service owns data through its repository."
+    },
+    {
+      "id": "rel-data-drift-detection-store-drift-detection",
+      "from": "data-drift-detection",
+      "to": "store-drift-detection",
+      "type": "writes",
+      "description": "Repository persists drift detection data to its store."
+    },
+    {
+      "id": "rel-app-drift-detection-observability",
+      "from": "app-drift-detection",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "drift detection service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-impact-analysis",
+      "from": "api",
+      "to": "app-impact-analysis",
+      "type": "invokes",
+      "description": "Entry layer delegates impact analysis work to the application service."
+    },
+    {
+      "id": "rel-app-impact-analysis-data-impact-analysis",
+      "from": "app-impact-analysis",
+      "to": "data-impact-analysis",
+      "type": "persists-through",
+      "description": "impact analysis service owns data through its repository."
+    },
+    {
+      "id": "rel-data-impact-analysis-store-impact-analysis",
+      "from": "data-impact-analysis",
+      "to": "store-impact-analysis",
+      "type": "writes",
+      "description": "Repository persists impact analysis data to its store."
+    },
+    {
+      "id": "rel-app-impact-analysis-observability",
+      "from": "app-impact-analysis",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "impact analysis service emits logs and metrics."
+    },
+    {
+      "id": "rel-api-app-verification",
+      "from": "api",
+      "to": "app-verification",
+      "type": "invokes",
+      "description": "Entry layer delegates verification work to the application service."
+    },
+    {
+      "id": "rel-app-verification-data-verification",
+      "from": "app-verification",
+      "to": "data-verification",
+      "type": "persists-through",
+      "description": "verification service owns data through its repository."
+    },
+    {
+      "id": "rel-data-verification-store-verification",
+      "from": "data-verification",
+      "to": "store-verification",
+      "type": "writes",
+      "description": "Repository persists verification data to its store."
+    },
+    {
+      "id": "rel-app-verification-observability",
+      "from": "app-verification",
+      "to": "observability",
+      "type": "emits-to",
+      "description": "verification service emits logs and metrics."
+    }
+  ],
+  "dataFlows": [
+    {
+      "id": "df-primary",
+      "name": "Primary Request Flow",
+      "description": "A developers request travels through the clean-architecture layers.",
+      "steps": [
+        {
+          "step": "Request received",
+          "from": "api",
+          "to": "authn",
+          "data": "request + credentials"
+        },
+        {
+          "step": "Capability executed",
+          "from": "api",
+          "to": "app-map-generation",
+          "data": "map generation"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-mental-model-generation",
+          "data": "mental model generation"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-guardrail-enforcement",
+          "data": "guardrail enforcement"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-context-retrieval",
+          "data": "context retrieval"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-drift-detection",
+          "data": "drift detection"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-impact-analysis",
+          "data": "impact analysis"
+        },
+        {
+          "step": "Next capability executed",
+          "from": "api",
+          "to": "app-verification",
+          "data": "verification"
+        },
+        {
+          "step": "Response returned",
+          "from": "api",
+          "data": "result envelope"
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "wf-primary",
+      "name": "Primary User Journey",
+      "description": "Core journey through map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification.",
+      "steps": [
+        "map generation",
+        "mental model generation",
+        "guardrail enforcement",
+        "context retrieval",
+        "drift detection",
+        "impact analysis",
+        "verification"
+      ],
+      "components": [
+        "api",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "inputs": [
+        "user intent"
+      ],
+      "outputs": [
+        "verification"
+      ]
+    },
+    {
+      "id": "wf-auth",
+      "name": "Authentication",
+      "description": "A principal authenticates and is authorized for the requested action.",
+      "steps": [
+        "Present credentials",
+        "Verify credentials",
+        "Issue principal context",
+        "Authorize requested action"
+      ],
+      "components": [
+        "api",
+        "authn"
+      ],
+      "inputs": [
+        "credentials"
+      ],
+      "outputs": [
+        "authorized principal context"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "environments": [
+    {
+      "id": "dev",
+      "name": "Development",
+      "description": "Local iteration with isolated data.",
+      "properties": [
+        "debug logging enabled"
+      ]
+    },
+    {
+      "id": "staging",
+      "name": "Staging",
+      "description": "Pre-production parity environment.",
+      "properties": [
+        "production-like data",
+        "all CI gates run"
+      ]
+    },
+    {
+      "id": "prod",
+      "name": "Production",
+      "description": "Customer-facing environment.",
+      "properties": [
+        "least privilege",
+        "audit logging",
+        "alerting"
+      ]
+    }
+  ],
+  "infrastructure": [
+    {
+      "id": "infra-app",
+      "name": "Application Hosting",
+      "description": "Runs the deployable artifact.",
+      "details": [
+        "immutable deploys",
+        "health checks",
+        "horizontal scaling"
+      ]
+    },
+    {
+      "id": "infra-db",
+      "name": "Database Hosting",
+      "description": "Hosts capability data stores.",
+      "details": [
+        "backups",
+        "encryption at rest",
+        "connection limits"
+      ]
+    },
+    {
+      "id": "infra-cicd",
+      "name": "CI/CD",
+      "description": "Build, test, and deploy pipeline.",
+      "details": [
+        "lint",
+        "typecheck",
+        "tests",
+        "EngineeringOS verification"
+      ]
+    }
+  ]
+}

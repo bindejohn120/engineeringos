@@ -1,0 +1,8 @@
+.vscode/**
+**/*.ts.map
+**/*.js.map
+src/**
+node_modules/**
+.gitignore
+.engineeringos/evidence/**
+.engineeringos/sessions/**

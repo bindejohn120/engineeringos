@@ -1,0 +1,813 @@
+{
+  "schemaVersion": "1.0",
+  "modelVersion": 10,
+  "updatedAt": "2026-08-17T17:31:45.578Z",
+  "basedOnCommit": null,
+  "systemUnderstanding": {
+    "purpose": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
+    "primaryUsers": [
+      "developers",
+      "tech leads",
+      "AI coding agents"
+    ],
+    "businessObjective": "Deliver map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification for EngineeringOS.",
+    "criticalCapabilities": [
+      "map generation",
+      "mental model generation",
+      "guardrail enforcement",
+      "context retrieval",
+      "drift detection",
+      "impact analysis",
+      "verification"
+    ],
+    "primaryWorkflows": [
+      "Primary User Journey",
+      "Authentication"
+    ],
+    "mostImportantConstraints": [
+      "Dependency rule: entry → application → domain → repository → infrastructure.",
+      "No secrets in code; configuration from validated environment.",
+      "Idempotency for all state-changing operations.",
+      "Tests required for every invariant and critical workflow."
+    ]
+  },
+  "entities": [
+    {
+      "id": "entity-map-generation",
+      "name": "Map Generation",
+      "description": "Concept owned by the map generation capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-mental-model-generation",
+      "name": "Mental Model Generation",
+      "description": "Concept owned by the mental model generation capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-guardrail-enforcement",
+      "name": "Guardrail Enforcement",
+      "description": "Concept owned by the guardrail enforcement capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-context-retrieval",
+      "name": "Context Retrieval",
+      "description": "Concept owned by the context retrieval capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-drift-detection",
+      "name": "Drift Detection",
+      "description": "Concept owned by the drift detection capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-impact-analysis",
+      "name": "Impact Analysis",
+      "description": "Concept owned by the impact analysis capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-verification",
+      "name": "Verification",
+      "description": "Concept owned by the verification capability.",
+      "kind": "domain-concept",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "entity-user",
+      "name": "User",
+      "description": "A principal interacting with EngineeringOS.",
+      "kind": "actor",
+      "source": "inference",
+      "confidence": 0.8
+    }
+  ],
+  "relationships": [
+    {
+      "id": "mrel-user-map-generation",
+      "from": "entity-user",
+      "to": "entity-map-generation",
+      "type": "engages-with",
+      "description": "Users engage the map generation capability."
+    },
+    {
+      "id": "mrel-map-generation-next",
+      "from": "entity-map-generation",
+      "to": "entity-mental-model-generation",
+      "type": "flows-into",
+      "description": "map generation output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-mental-model-generation",
+      "from": "entity-user",
+      "to": "entity-mental-model-generation",
+      "type": "engages-with",
+      "description": "Users engage the mental model generation capability."
+    },
+    {
+      "id": "mrel-mental-model-generation-next",
+      "from": "entity-mental-model-generation",
+      "to": "entity-guardrail-enforcement",
+      "type": "flows-into",
+      "description": "mental model generation output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-guardrail-enforcement",
+      "from": "entity-user",
+      "to": "entity-guardrail-enforcement",
+      "type": "engages-with",
+      "description": "Users engage the guardrail enforcement capability."
+    },
+    {
+      "id": "mrel-guardrail-enforcement-next",
+      "from": "entity-guardrail-enforcement",
+      "to": "entity-context-retrieval",
+      "type": "flows-into",
+      "description": "guardrail enforcement output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-context-retrieval",
+      "from": "entity-user",
+      "to": "entity-context-retrieval",
+      "type": "engages-with",
+      "description": "Users engage the context retrieval capability."
+    },
+    {
+      "id": "mrel-context-retrieval-next",
+      "from": "entity-context-retrieval",
+      "to": "entity-drift-detection",
+      "type": "flows-into",
+      "description": "context retrieval output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-drift-detection",
+      "from": "entity-user",
+      "to": "entity-drift-detection",
+      "type": "engages-with",
+      "description": "Users engage the drift detection capability."
+    },
+    {
+      "id": "mrel-drift-detection-next",
+      "from": "entity-drift-detection",
+      "to": "entity-impact-analysis",
+      "type": "flows-into",
+      "description": "drift detection output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-impact-analysis",
+      "from": "entity-user",
+      "to": "entity-impact-analysis",
+      "type": "engages-with",
+      "description": "Users engage the impact analysis capability."
+    },
+    {
+      "id": "mrel-impact-analysis-next",
+      "from": "entity-impact-analysis",
+      "to": "entity-verification",
+      "type": "flows-into",
+      "description": "impact analysis output feeds the next capability in the journey."
+    },
+    {
+      "id": "mrel-user-verification",
+      "from": "entity-user",
+      "to": "entity-verification",
+      "type": "engages-with",
+      "description": "Users engage the verification capability."
+    }
+  ],
+  "causalRelationships": [
+    {
+      "id": "CR-001",
+      "cause": "Payment failure or timeout",
+      "effect": "Order is cancelled or held, never partially paid",
+      "conditions": [
+        "payment is in-flight",
+        "idempotency key present"
+      ],
+      "sideEffects": [
+        "retryable failure logged",
+        "webhook deduplicated"
+      ]
+    },
+    {
+      "id": "CR-002",
+      "cause": "External provider outage",
+      "effect": "Capability degrades gracefully with retries and circuit breaking",
+      "conditions": [
+        "circuit breaker open"
+      ],
+      "sideEffects": [
+        "degraded-mode responses",
+        "recovery probing"
+      ]
+    }
+  ],
+  "businessRules": [
+    {
+      "id": "BR-MAP-GENERATION",
+      "statement": "map generation must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-MENTAL-MODEL-GENERATION",
+      "statement": "mental model generation must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-GUARDRAIL-ENFORCEMENT",
+      "statement": "guardrail enforcement must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-CONTEXT-RETRIEVAL",
+      "statement": "context retrieval must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-DRIFT-DETECTION",
+      "statement": "drift detection must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-IMPACT-ANALYSIS",
+      "statement": "impact analysis must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-VERIFICATION",
+      "statement": "verification must behave predictably: same input, same output, safe under retry and concurrency.",
+      "severity": "warning",
+      "source": "inference",
+      "confidence": 0.7
+    },
+    {
+      "id": "BR-AUTH",
+      "statement": "No capability may be reached without authentication and authorization.",
+      "severity": "blocking",
+      "source": "inference",
+      "confidence": 0.9
+    },
+    {
+      "id": "BR-IDEMPOTENT",
+      "statement": "Repeating any state-changing operation must produce the same result as the first attempt.",
+      "severity": "blocking",
+      "source": "inference",
+      "confidence": 0.9
+    }
+  ],
+  "invariants": [
+    {
+      "id": "INV-001",
+      "statement": "Only authorized principals may read or mutate protected data.",
+      "severity": "blocking",
+      "scope": [
+        "api",
+        "authn"
+      ],
+      "enforcement": [
+        "authorization guardrail",
+        "default-deny endpoints"
+      ],
+      "verification": [
+        "authorization guardrail validation",
+        "negative-path tests"
+      ]
+    },
+    {
+      "id": "INV-002",
+      "statement": "State-changing operations are idempotent: retries never duplicate effects.",
+      "severity": "blocking",
+      "scope": [
+        "api",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "enforcement": [
+        "idempotency keys on mutation endpoints"
+      ],
+      "verification": [
+        "retry tests",
+        "idempotency contract tests"
+      ]
+    },
+    {
+      "id": "INV-003",
+      "statement": "Multi-step writes are atomic: no partial state is observable.",
+      "severity": "blocking",
+      "scope": [
+        "data-map-generation",
+        "data-mental-model-generation",
+        "data-guardrail-enforcement",
+        "data-context-retrieval",
+        "data-drift-detection",
+        "data-impact-analysis",
+        "data-verification"
+      ],
+      "enforcement": [
+        "transactions",
+        "write-through repositories"
+      ],
+      "verification": [
+        "rollback tests",
+        "concurrency tests"
+      ]
+    },
+    {
+      "id": "INV-004",
+      "statement": "Security-relevant actions are written to an audit trail.",
+      "severity": "warning",
+      "scope": [
+        "api",
+        "authn"
+      ],
+      "enforcement": [
+        "audit logging on auth and mutation"
+      ],
+      "verification": [
+        "audit trail tests"
+      ]
+    },
+    {
+      "id": "INV-005",
+      "statement": "No secrets or credentials exist anywhere in the repository.",
+      "severity": "blocking",
+      "scope": [
+        "config"
+      ],
+      "enforcement": [
+        "secret-scan guardrail"
+      ],
+      "verification": [
+        "guardrail validation",
+        "secret scan"
+      ]
+    },
+    {
+      "id": "INV-006",
+      "statement": "The engineering model and the codebase never diverge without recorded evidence.",
+      "severity": "advisory",
+      "scope": [],
+      "enforcement": [
+        "EngineeringOS drift detection"
+      ],
+      "verification": [
+        "engineeringos.verify"
+      ]
+    }
+  ],
+  "stateMachines": [],
+  "workflows": [],
+  "failureModes": [
+    {
+      "id": "FM-001",
+      "name": "Capability service failure",
+      "description": "A capability is unavailable or inconsistent.",
+      "severity": "warning",
+      "mitigation": "Health checks, isolated modules, alerting.",
+      "evidence": []
+    },
+    {
+      "id": "FM-002",
+      "name": "Data store outage",
+      "description": "Persistence is unavailable, blocking reads and writes.",
+      "severity": "blocking",
+      "mitigation": "Retries, failover, backups.",
+      "evidence": []
+    },
+    {
+      "id": "FM-003",
+      "name": "External provider timeout",
+      "description": "Payment/notification provider exceeds its budget.",
+      "severity": "warning",
+      "mitigation": "Timeout, retry with backoff, circuit breaker.",
+      "evidence": []
+    },
+    {
+      "id": "FM-004",
+      "name": "Data inconsistency",
+      "description": "Partial writes or duplicate effects observed.",
+      "severity": "blocking",
+      "mitigation": "Transactions and idempotency.",
+      "evidence": []
+    }
+  ],
+  "recoveryStrategies": [
+    {
+      "id": "RS-001",
+      "name": "Retry with exponential backoff",
+      "description": "Transient failures are retried with jitter and bounded attempts.",
+      "appliesTo": "external calls"
+    },
+    {
+      "id": "RS-002",
+      "name": "Circuit breaker",
+      "description": "Failing dependencies trip open and probe recovery.",
+      "appliesTo": "external systems"
+    },
+    {
+      "id": "RS-003",
+      "name": "Idempotent replay",
+      "description": "Consumers replay events without duplicating effects.",
+      "appliesTo": "state-changing operations"
+    },
+    {
+      "id": "RS-004",
+      "name": "Rollback to previous artifact",
+      "description": "Deploys are reversible in one action.",
+      "appliesTo": "delivery"
+    }
+  ],
+  "architecturalPrinciples": [
+    {
+      "id": "PR-001",
+      "name": "Dependency Rule",
+      "description": "Dependencies point inward; entry code never reaches storage directly."
+    },
+    {
+      "id": "PR-002",
+      "name": "Fail Fast",
+      "description": "Validate at boundaries; surface errors immediately with context."
+    },
+    {
+      "id": "PR-003",
+      "name": "Least Privilege",
+      "description": "Every principal and process gets the minimum access required."
+    },
+    {
+      "id": "PR-004",
+      "name": "Defense in Depth",
+      "description": "Security is enforced at entry, service, and data layers simultaneously."
+    },
+    {
+      "id": "PR-005",
+      "name": "Idempotent by Default",
+      "description": "Side effects are safe to retry by construction."
+    },
+    {
+      "id": "PR-006",
+      "name": "Observed over Assumed",
+      "description": "Claims about the system require evidence from code, tests, or runtime."
+    },
+    {
+      "id": "PR-007",
+      "name": "Keep It Minimal",
+      "description": "No speculative abstraction, dependency, or code."
+    },
+    {
+      "id": "PR-008",
+      "name": "Predictable Structure",
+      "description": "Modules, names, and boundaries are consistent and discoverable."
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "Architecture Style",
+      "context": "Initial architecture decision made while generating the EngineeringOS engineering model.",
+      "decision": "Adopt clean-architecture architecture with enforced module boundaries.",
+      "reason": "Matches the project scale and the goal of a predictable, maintainable codebase.",
+      "alternatives": [
+        "monolithic",
+        "microservices",
+        "event-driven",
+        "clean-architecture"
+      ],
+      "consequences": [
+        "Boundaries enforced by guardrails",
+        "Modules may be extracted to services later"
+      ],
+      "affectedComponents": [
+        "api",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "status": "proposed",
+      "date": "2026-08-17T17:31:45.436Z",
+      "source": "inference",
+      "confidence": 0.6,
+      "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
+    },
+    {
+      "id": "DEC-002",
+      "title": "Idempotency Strategy",
+      "context": "Initial architecture decision made while generating the EngineeringOS engineering model.",
+      "decision": "State-changing endpoints accept an idempotency key and return the stored result on retry.",
+      "reason": "Makes retries and webhook replays safe, which is essential for payments and external systems.",
+      "alternatives": [
+        "at-most-once semantics",
+        "client-generated tokens"
+      ],
+      "consequences": [
+        "Slightly larger request contract",
+        "Idempotency store per capability"
+      ],
+      "affectedComponents": [
+        "api",
+        "payment-gateway"
+      ],
+      "status": "proposed",
+      "date": "2026-08-17T17:31:45.436Z",
+      "source": "inference",
+      "confidence": 0.6,
+      "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
+    },
+    {
+      "id": "DEC-003",
+      "title": "Error Handling",
+      "context": "Initial architecture decision made while generating the EngineeringOS engineering model.",
+      "decision": "Use explicit typed errors and fail-fast validation; no empty catches.",
+      "reason": "Makes failures predictable and diagnosable across the system.",
+      "alternatives": [
+        "exceptions everywhere",
+        "silent fallbacks"
+      ],
+      "consequences": [
+        "Callers choose recovery",
+        "Errors carry structured context"
+      ],
+      "affectedComponents": [
+        "api",
+        "app-map-generation",
+        "app-mental-model-generation",
+        "app-guardrail-enforcement",
+        "app-context-retrieval",
+        "app-drift-detection",
+        "app-impact-analysis",
+        "app-verification"
+      ],
+      "status": "proposed",
+      "date": "2026-08-17T17:31:45.436Z",
+      "source": "inference",
+      "confidence": 0.6,
+      "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
+    },
+    {
+      "id": "DEC-004",
+      "title": "Observability",
+      "context": "Initial architecture decision made while generating the EngineeringOS engineering model.",
+      "decision": "Structured JSON logging via the observability module; console logging banned in production paths.",
+      "reason": "Enables diagnosis without guesswork and keeps PII out of logs.",
+      "alternatives": [
+        "plain text logs",
+        "ad-hoc logging"
+      ],
+      "consequences": [
+        "Structured logs are searchable",
+        "Logging goes through one module"
+      ],
+      "affectedComponents": [
+        "observability"
+      ],
+      "status": "proposed",
+      "date": "2026-08-17T17:31:45.436Z",
+      "source": "inference",
+      "confidence": 0.6,
+      "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
+    },
+    {
+      "id": "DEC-005",
+      "title": "Configuration",
+      "context": "Initial architecture decision made while generating the EngineeringOS engineering model.",
+      "decision": "All configuration is validated at startup from the environment; secrets never enter the repository.",
+      "reason": "Keeps secrets out of code and catches misconfiguration early.",
+      "alternatives": [
+        "config files committed",
+        "magic constants"
+      ],
+      "consequences": [
+        "Environment must be complete to boot",
+        "Secret scan guardrail stays green"
+      ],
+      "affectedComponents": [
+        "config"
+      ],
+      "status": "proposed",
+      "date": "2026-08-17T17:31:45.436Z",
+      "source": "inference",
+      "confidence": 0.6,
+      "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-001",
+      "statement": "The listed primary users (developers, tech leads and AI coding agents) accurately represent who uses the system.",
+      "impact": "high",
+      "source": "assumption",
+      "confidence": 0.7,
+      "evidence": []
+    },
+    {
+      "id": "ASM-002",
+      "statement": "The critical capabilities (map generation, mental model generation, guardrail enforcement, context retrieval, drift detection, impact analysis and verification) define the complete initial scope.",
+      "impact": "high",
+      "source": "assumption",
+      "confidence": 0.6,
+      "evidence": []
+    },
+    {
+      "id": "ASM-003",
+      "statement": "Build proceeds from the current workspace state; existing code must be reconciled with the model.",
+      "impact": "medium",
+      "source": "assumption",
+      "confidence": 0.8,
+      "evidence": []
+    },
+    {
+      "id": "ASM-004",
+      "statement": "A single deployable artifact hosts all capabilities with separate modules.",
+      "impact": "medium",
+      "source": "assumption",
+      "confidence": 0.7,
+      "evidence": []
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "UNK-001",
+      "question": "What are the most critical business workflows and their exact failure modes?",
+      "impact": "high",
+      "blocks": [
+        "verification plan",
+        "invariant completeness"
+      ],
+      "status": "partially-resolved",
+      "evidence": [
+        {
+          "type": "developer-confirmation",
+          "location": "onboarding",
+          "description": "Identified 7 critical capabilities from onboarding"
+        }
+      ]
+    },
+    {
+      "id": "UNK-002",
+      "question": "What load and concurrency are expected at launch?",
+      "impact": "high",
+      "blocks": [
+        "performance and capacity planning"
+      ],
+      "status": "unresolved",
+      "evidence": []
+    },
+    {
+      "id": "UNK-003",
+      "question": "What compliance and regulatory requirements apply?",
+      "impact": "medium",
+      "blocks": [
+        "security level selection"
+      ],
+      "status": "unresolved",
+      "evidence": []
+    },
+    {
+      "id": "UNK-004",
+      "question": "What are the exact contracts of external systems (payment, notification, auth providers)?",
+      "impact": "medium",
+      "blocks": [
+        "adapter implementations"
+      ],
+      "status": "unresolved",
+      "evidence": []
+    },
+    {
+      "id": "UNK-005",
+      "question": "What is the release cadence and who operates the system?",
+      "impact": "low",
+      "blocks": [
+        "CI/CD and on-call design"
+      ],
+      "status": "unresolved",
+      "evidence": []
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CON-001",
+      "statement": "All code is type-safe; no `any` at module boundaries.",
+      "scope": "src/**"
+    },
+    {
+      "id": "CON-002",
+      "statement": "Secrets and credentials never appear in code or generated files.",
+      "scope": "repository"
+    },
+    {
+      "id": "CON-003",
+      "statement": "Automated tests are mandatory for new behavior and every invariant.",
+      "scope": "src/**"
+    },
+    {
+      "id": "CON-004",
+      "statement": "The dependency rule is enforced by guardrails; violations block merge.",
+      "scope": "src/**"
+    },
+    {
+      "id": "CON-005",
+      "statement": "Public APIs stay backward compatible unless a new version is introduced.",
+      "scope": "api"
+    },
+    {
+      "id": "CON-006",
+      "statement": "Every committed change passes lint, typecheck, tests, and EngineeringOS verification.",
+      "scope": "CI"
+    }
+  ],
+  "currentState": {
+    "summary": "Initial model generated from onboarding; no code verified yet.",
+    "modelStage": "DRAFT"
+  },
+  "intendedState": {
+    "summary": "Production-grade EngineeringOS with verified invariants, automated tests, and a green EngineeringOS verification.",
+    "modelStage": "STEADY"
+  },
+  "risks": [
+    {
+      "id": "RISK-001",
+      "name": "Architectural drift",
+      "description": "Changes may violate the intended architecture over time.",
+      "likelihood": "medium",
+      "impact": "high",
+      "mitigation": "EngineeringOS guardrails, drift detection, and regular verification."
+    },
+    {
+      "id": "RISK-002",
+      "name": "Supply-chain dependency risk",
+      "description": "A vulnerable or abandoned dependency may undermine security.",
+      "likelihood": "medium",
+      "impact": "high",
+      "mitigation": "Pin versions, scan dependencies, and review before adding new packages."
+    },
+    {
+      "id": "RISK-003",
+      "name": "Data integrity under concurrency",
+      "description": "Concurrent writes may cause lost updates or partial states.",
+      "likelihood": "medium",
+      "impact": "high",
+      "mitigation": "Transactions, optimistic locking, and idempotency keys."
+    },
+    {
+      "id": "RISK-004",
+      "name": "Scaling beyond design assumptions",
+      "description": "Growth may exceed the capacity of a single artifact or store.",
+      "likelihood": "low",
+      "impact": "medium",
+      "mitigation": "Stateless services, cacheable reads, and partitioned data stores."
+    },
+    {
+      "id": "RISK-005",
+      "name": "Security debt from unguarded changes",
+      "description": "Expedient AI-generated changes may skip auth or leak secrets.",
+      "likelihood": "medium",
+      "impact": "high",
+      "mitigation": "Security guardrails, secret scanning, and security review in Definition of Done."
+    },
+    {
+      "id": "RISK-006",
+      "name": "External gateway single point of failure",
+      "description": "Payment/notification provider outages degrade core flows.",
+      "likelihood": "medium",
+      "impact": "medium",
+      "mitigation": "Timeouts, retries with backoff, circuit breakers, and degraded-mode responses."
+    }
+  ],
+  "predictions": [],
+  "evidence": []
+}

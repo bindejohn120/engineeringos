@@ -1,0 +1,146 @@
+{
+  "name": "engineeringos",
+  "displayName": "EngineeringOS",
+  "description": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
+  "version": "0.1.0",
+  "publisher": "engineeringos",
+  "license": "MIT",
+  "bin": {
+    "engineeringos": "./dist/cli.js"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "engineeringos.ask",
+        "title": "Ask EngineeringOS"
+      },
+      {
+        "command": "engineeringos.showOverview",
+        "title": "EngineeringOS: Show Overview"
+      },
+      {
+        "command": "engineeringos.showMap",
+        "title": "EngineeringOS: Show Engineering Map"
+      },
+      {
+        "command": "engineeringos.showMentalModel",
+        "title": "EngineeringOS: Show Mental Model"
+      },
+      {
+        "command": "engineeringos.showGuardrails",
+        "title": "EngineeringOS: Show Guardrails"
+      },
+      {
+        "command": "engineeringos.analyzeChange",
+        "title": "EngineeringOS: Analyze Current Change"
+      },
+      {
+        "command": "engineeringos.predictImpact",
+        "title": "EngineeringOS: Predict Impact"
+      },
+      {
+        "command": "engineeringos.verify",
+        "title": "EngineeringOS: Verify Current Change"
+      },
+      {
+        "command": "engineeringos.updateModel",
+        "title": "EngineeringOS: Update Model"
+      },
+      {
+        "command": "engineeringos.prepareContext",
+        "title": "EngineeringOS: Prepare Agent Context"
+      },
+      {
+        "command": "engineeringos.showRisks",
+        "title": "EngineeringOS: Show Risks"
+      },
+      {
+        "command": "engineeringos.showUnknowns",
+        "title": "EngineeringOS: Show Unknowns"
+      },
+      {
+        "command": "engineeringos.explainArchitecture",
+        "title": "EngineeringOS: Explain Architecture"
+      },
+      {
+        "command": "engineeringos.initialize",
+        "title": "EngineeringOS: Initialize Engineering Model"
+      },
+      {
+        "command": "engineeringos.resetModel",
+        "title": "EngineeringOS: Start New Project (Reset)"
+      },
+      {
+        "command": "engineeringos.generateBlueprint",
+        "title": "EngineeringOS: Generate Engineering Blueprint"
+      },
+      {
+        "command": "engineeringos.openBlueprint",
+        "title": "EngineeringOS: Open Engineering Blueprint"
+      },
+      {
+        "command": "engineeringos.analyzeRepository",
+        "title": "EngineeringOS: Analyze Repository"
+      },
+      {
+        "command": "engineeringos.runExecutableGuardrails",
+        "title": "EngineeringOS: Run Executable Guardrails"
+      },
+      {
+        "command": "engineeringos.healthReport",
+        "title": "EngineeringOS: Health Report"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "engineeringos",
+          "title": "EngineeringOS",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "engineeringos": [
+        {
+          "type": "webview",
+          "id": "engineeringos.sidebar",
+          "name": "EngineeringOS",
+          "contextualTitle": "EngineeringOS"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "vscode:package": "npm run build && vsce package"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.23.1": true,
+    "esbuild@0.21.5": true
+  }
+}
