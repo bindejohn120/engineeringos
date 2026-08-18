@@ -79,17 +79,16 @@ export class OpenAICompatibleClient implements AIClient {
   }
 }
 
-export function createAIClient(config: ConfigLike): AIClient | null {
+export function createAIClient(config: ConfigLike, secretApiKey?: string): AIClient | null {
   const ai = config.ai;
   if (!ai || ai.provider === 'none' || ai.enabled === false) return null;
 
-  const envKeyName = ai.apiKeyEnv || 'ENGINEERINGOS_AI_KEY';
-  const apiKey = process.env[envKeyName] || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
+  const apiKey = secretApiKey || process.env[ai.apiKeyEnv || 'ENGINEERINGOS_AI_KEY'] || process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
 
   const isOpenRouter = apiKey.startsWith('sk-or-') || ai.provider === 'openrouter';
-  const baseUrl = ai.baseUrl || (isOpenRouter ? OPENROUTER_BASE_URL : OPENAI_BASE_URL);
-  const defaultModel = isOpenRouter ? 'anthropic/claude-sonnet-4' : 'gpt-4o-mini';
+  const baseUrl = ai.baseUrl || (isOpenRouter ? OPENROUTER_BASE_URL : ai.provider === 'openai' ? OPENAI_BASE_URL : undefined);
+  const defaultModel = isOpenRouter ? 'anthropic/claude-sonnet-4' : ai.provider === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o-mini';
 
   return new OpenAICompatibleClient({
     model: ai.model || defaultModel,

@@ -98,6 +98,7 @@ export interface OnboardingResult {
 export class EngineeringOSEngine {
   readonly repository: EngineeringOSRepository;
   private readonly exportAdapter = new FileExportAdapter();
+  secretApiKey?: string;
 
   constructor(readonly workspacePath: string) {
     this.repository = new EngineeringOSRepository(workspacePath);
@@ -225,7 +226,7 @@ export class EngineeringOSEngine {
     }
 
     if (enriched.useAI !== false) {
-      const client = createAIClient(config);
+      const client = createAIClient(config, this.secretApiKey);
       if (client) {
         try {
           const pipelineResult = await runAIPipeline({
@@ -302,7 +303,7 @@ export class EngineeringOSEngine {
     let note: string | undefined;
     const config = await this.repository.loadConfig();
     if (config) {
-      const client = createAIClient(config);
+      const client = createAIClient(config, this.secretApiKey);
       if (client) {
         const enhanced = await aiEnhanceBlueprint(client, blueprint, input);
         blueprint = enhanced.blueprint;
@@ -318,7 +319,7 @@ export class EngineeringOSEngine {
   async aiStatus(): Promise<{ configured: boolean; kind: string | null }> {
     const config = await this.repository.loadConfig();
     if (!config) return { configured: false, kind: null };
-    const client = createAIClient(config);
+    const client = createAIClient(config, this.secretApiKey);
     return { configured: Boolean(client?.isConfigured), kind: client?.kind ?? null };
   }
 
@@ -326,7 +327,7 @@ export class EngineeringOSEngine {
     const state = await this.loadStateOrThrow();
     const config = await this.repository.loadConfig();
     if (!config) return null;
-    const client = createAIClient(config);
+    const client = createAIClient(config, this.secretApiKey);
     if (!client) return null;
     const impact = await computeImpact({
       target: question,

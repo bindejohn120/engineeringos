@@ -150,6 +150,18 @@ li { margin-bottom: 2px; }
     if (p.verification) {
       h += '<div class="card"><h3>Last Verification</h3><div class="severity sev-' + (p.verification.overall === 'BLOCK' ? 'blocking' : p.verification.overall === 'REVIEW' ? 'warning' : 'advisory') + '" style="font-size:18px">' + p.verification.overall + '</div></div>';
     }
+    if (p.ai) {
+      var aiColor = p.ai.configured ? 'var(--green)' : 'var(--amber)';
+      var aiLabel = p.ai.configured ? p.ai.provider + ' / ' + p.ai.model : 'Not configured';
+      h += '<div class="card"><h3>AI Provider</h3>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:8px;height:8px;border-radius:50%;background:' + aiColor + '"></div>' +
+        '<span style="font-weight:600">' + esc(p.ai.provider) + '</span>' +
+        '<span class="muted">' + esc(p.ai.model) + '</span>' +
+        '</div>' +
+        (!p.ai.configured ? '<button class="action" data-cmd="configureAI" style="margin-top:8px"><span class="arrow">🔑</span> Configure AI Key</button>' : '') +
+        '</div>';
+    }
     if (p.quality) {
       var gradeColor = p.quality.score >= 90 ? '#4caf50' : p.quality.score >= 70 ? '#ff9800' : '#f44336';
       h += '<div class="card"><h3>Quality Score</h3>' +
@@ -170,6 +182,7 @@ li { margin-bottom: 2px; }
       '<button class="action" data-cmd="context"><span class="arrow">→</span> Prepare Agent Context</button>' +
       '<button class="action" data-cmd="update"><span class="arrow">→</span> Update Model</button>' +
       '<button class="action" data-cmd="ask"><span class="arrow">→</span> Ask EngineeringOS</button>' +
+      '<button class="action" data-cmd="configureAI"><span class="arrow">🔑</span> Configure AI Key</button>' +
       '<button class="action" data-cmd="reset" style="color:var(--red);border-color:var(--red);margin-top:8px"><span class="arrow">↺</span> Start New Project (Reset)</button>' +
       '</div>';
     app.innerHTML = h;

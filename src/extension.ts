@@ -18,6 +18,7 @@ const COMMANDS = [
   'engineeringos.showUnknowns',
   'engineeringos.explainArchitecture',
   'engineeringos.initialize',
+  'engineeringos.configureAI',
   'engineeringos.resetModel',
   'engineeringos.generateBlueprint',
   'engineeringos.openBlueprint',
@@ -28,13 +29,9 @@ const COMMANDS = [
 
 export function activate(context: vscode.ExtensionContext): void {
   const workspace = vscode.workspace.workspaceFolders?.[0];
-  if (!workspace) {
-    void vscode.window.showWarningMessage('EngineeringOS requires an open workspace folder.');
-    return;
-  }
 
-  const engine = new EngineeringOSEngine(workspace.uri.fsPath);
-  const provider = new EngineeringOSSidebarProvider(engine);
+  const engine = new EngineeringOSEngine(workspace?.uri.fsPath ?? '');
+  const provider = new EngineeringOSSidebarProvider(engine, context);
 
   const sidebar = vscode.window.registerWebviewViewProvider(EngineeringOSSidebarProvider.viewType, provider);
   context.subscriptions.push(sidebar);
@@ -46,6 +43,11 @@ export function activate(context: vscode.ExtensionContext): void {
   statusBar.show();
   context.subscriptions.push(statusBar);
 
+  if (!workspace) {
+    statusBar.text = '$(circuit-board) EngineeringOS · no workspace';
+    return;
+  }
+
   const handlers: Record<(typeof COMMANDS)[number], () => Promise<void>> = {
     'engineeringos.initialize': async () => {
       await revealSidebar();
@@ -55,6 +57,10 @@ export function activate(context: vscode.ExtensionContext): void {
     'engineeringos.resetModel': async () => {
       await revealSidebar();
       await provider.reset();
+    },
+
+    'engineeringos.configureAI': async () => {
+      await provider.configureAI();
     },
 
     'engineeringos.generateBlueprint': async () => {
@@ -292,7 +298,7 @@ export function activate(context: vscode.ExtensionContext): void {
   watchers.onDidDelete(scheduleVerify);
   context.subscriptions.push(watchers);
 
-  void startup(engine, statusBar, provider);
+  void startup(engine, statusBar, provider, context);
 }
 
 async function withInitialized<T>(fn: () => Promise<T>): Promise<T | undefined> {
@@ -361,7 +367,13 @@ async function openMarkdownFile(engine: EngineeringOSEngine, blueprint?: Bluepri
   await vscode.window.showTextDocument(doc, { preview: true });
 }
 
-async function startup(engine: EngineeringOSEngine, statusBar: vscode.StatusBarItem, provider: EngineeringOSSidebarProvider): Promise<void> {
+async function startup(engine: EngineeringOSEngine, statusBar: vscode.StatusBarItem, provider: EngineeringOSSidebarProvider, context: vscode.ExtensionContext): Promise<void> {
+  // Load AI secret key from VS Code secret storage
+  const config = await engine.repository.loadConfig().catch(() => null);
+  if (config?.ai?.provider) {
+    engine.secretApiKey = await context.secrets.get(`engineeringos.ai.apiKey.${config.ai.provider}`);
+  }
+
   const initialized = await engine.isInitialized();
   if (initialized) {
     statusBar.text = '$(circuit-board) EngineeringOS · ready';

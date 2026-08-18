@@ -13,6 +13,7 @@ interface OverviewPayload {
   verification?: { overall: string };
   blueprint?: { sections: number; architectureStyle: string; securityLevel: string; aiEnabled: boolean };
   quality?: { score: number; grade: string; map: number; mentalModel: number; guardrails: number; blueprint: number; recommendations: string[] };
+  ai?: { configured: boolean; provider: string; model: string };
 }
 
 interface MapPayload {
@@ -58,7 +59,7 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
   private view?: vscode.WebviewView;
   private pendingState?: WebviewState;
 
-  constructor(private readonly engine: EngineeringOSEngine) {}
+  constructor(private readonly engine: EngineeringOSEngine, private readonly extensionContext?: vscode.ExtensionContext) {}
 
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.view = webviewView;
@@ -121,7 +122,12 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
   private async handleAISuggest(phaseId: string): Promise<void> {
     try {
       const config = await this.engine.repository.loadConfig();
-      const client = config ? (await import('../ai/provider')).createAIClient(config) : null;
+      let secretKey: string | undefined;
+      if (this.extensionContext && config) {
+        const provider = config.ai?.provider || 'openrouter';
+        secretKey = await this.extensionContext.secrets.get(`engineeringos.ai.apiKey.${provider}`);
+      }
+      const client = config ? (await import('../ai/provider')).createAIClient(config, secretKey) : null;
       let suggestions: Record<string, string[]> = {};
 
       if (client && client.isConfigured && config) {
@@ -277,6 +283,9 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
         break;
       case 'reset':
         await this.reset();
+        break;
+      case 'configureAI':
+        await this.configureAI();
         break;
       case 'showOverview':
       case 'showMap':
@@ -492,14 +501,121 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
     await this.post({ ...state, activeUpdate: { findings } });
   }
 
+  async configureAI(): Promise<void> {
+    const providers = [
+      { label: 'OpenRouter', value: 'openrouter', models: ['anthropic/claude-sonnet-4', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o', 'openai/gpt-4o-mini', 'google/gemini-2.0-flash-001', 'deepseek/deepseek-chat'] },
+      { label: 'OpenAI', value: 'openai', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-mini'] },
+      { label: 'Anthropic (direct)', value: 'anthropic', models: ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-haiku-20240307'] },
+      { label: 'Custom (OpenAI-compatible)', value: 'custom', models: [] }
+    ];
+
+    const selectedProvider = await vscode.window.showQuickPick(
+      providers.map((p) => ({ label: p.label, description: p.value === 'openrouter' ? '(Recommended)' : '', _value: p.value, _models: p.models })),
+      { placeHolder: 'Select AI provider', title: 'EngineeringOS — Configure AI' }
+    );
+    if (!selectedProvider) return;
+
+    const apiKey = await vscode.window.showInputBox({
+      prompt: `Enter your ${selectedProvider.label} API key`,
+      password: true,
+      placeHolder: selectedProvider._value === 'openrouter' ? 'sk-or-v1-...' : selectedProvider._value === 'openai' ? 'sk-...' : selectedProvider._value === 'anthropic' ? 'sk-ant-...' : 'your-api-key',
+      title: 'EngineeringOS — Configure AI',
+      validateInput: (v) => v.trim().length > 0 ? null : 'API key is required'
+    });
+    if (!apiKey) return;
+
+    let model: string;
+    if (selectedProvider._value === 'custom') {
+      const customModel = await vscode.window.showInputBox({
+        prompt: 'Enter the model name (e.g. gpt-4o, claude-3-opus)',
+        placeHolder: 'model-name',
+        title: 'EngineeringOS — Configure AI',
+        validateInput: (v) => v.trim().length > 0 ? null : 'Model name is required'
+      });
+      if (!customModel) return;
+      model = customModel.trim();
+    } else {
+      const selectedModel = await vscode.window.showQuickPick(
+        selectedProvider._models.map((m) => ({ label: m })),
+        { placeHolder: 'Select model', title: 'EngineeringOS — Configure AI' }
+      );
+      if (!selectedModel) return;
+      model = selectedModel.label;
+    }
+
+    let baseUrl: string | undefined;
+    if (selectedProvider._value === 'custom') {
+      const customUrl = await vscode.window.showInputBox({
+        prompt: 'Enter the API base URL (OpenAI-compatible)',
+        placeHolder: 'https://your-api.example.com/v1',
+        title: 'EngineeringOS — Configure AI',
+        validateInput: (v) => v.trim().length > 0 ? null : 'Base URL is required'
+      });
+      if (!customUrl) return;
+      baseUrl = customUrl.trim();
+    }
+
+    // Store API key in VS Code secret storage
+    const secretKey = `engineeringos.ai.apiKey.${selectedProvider._value}`;
+    if (this.extensionContext) {
+      await this.extensionContext.secrets.store(secretKey, apiKey.trim());
+    }
+
+    // Update config file
+    const existingConfig = await this.engine.repository.loadConfig();
+    if (existingConfig) {
+      existingConfig.ai = {
+        ...existingConfig.ai,
+        provider: selectedProvider._value,
+        model,
+        enabled: true,
+        baseUrl
+      };
+      await this.engine.repository.saveConfig(existingConfig);
+    } else {
+      await this.engine.ensureLayout();
+      await this.engine.repository.saveConfig({
+        schemaVersion: '1.0.0',
+        projectId: 'project',
+        projectName: 'Untitled',
+        workspacePath: this.engine.workspacePath,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        analysis: { enabled: true, watchFiles: true, watchGit: true },
+        ai: { provider: selectedProvider._value, model, contextMode: 'on-demand', enabled: true, baseUrl }
+      });
+    }
+
+    // Store provider info for secret retrieval
+    if (this.extensionContext) {
+      await this.extensionContext.secrets.store('engineeringos.ai.activeProvider', selectedProvider._value);
+    }
+
+    void vscode.window.showInformationMessage(`EngineeringOS AI configured: ${selectedProvider.label} / ${model}`);
+
+    // Refresh sidebar to show new AI status
+    await this.refresh();
+  }
+
   private async loadForUi(): Promise<WebviewState> {
+    // Load secret key into engine
+    let aiConfig: { provider: string; model: string } | undefined;
+    if (this.extensionContext) {
+      const config = await this.engine.repository.loadConfig();
+      const provider = config?.ai?.provider || 'openrouter';
+      this.engine.secretApiKey = await this.extensionContext.secrets.get(`engineeringos.ai.apiKey.${provider}`);
+      if (config?.ai) {
+        aiConfig = { provider: config.ai.provider, model: config.ai.model || '' };
+      }
+    }
+
     const state = await this.engine.loadState();
     if (!state) return { initialized: false } as WebviewState;
     const [blueprint, aiStatus] = await Promise.all([
       this.engine.repository.loadBlueprint(),
       this.engine.aiStatus()
     ]);
-    return buildState(state, blueprint, aiStatus.configured);
+    return buildState(state, blueprint, aiStatus.configured, aiConfig);
   }
 
   private async post(state: WebviewState): Promise<void> {
@@ -526,7 +642,8 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
 function buildState(
   state: AgentState,
   blueprint?: Blueprint | null,
-  aiEnabled = false
+  aiEnabled = false,
+  aiConfig?: { provider: string; model: string }
 ): WebviewState {
   const map = state.map as Map;
   const mentalModel = state.mentalModel as MentalModel;
@@ -544,6 +661,9 @@ function buildState(
       unknowns: mentalModel.unknowns.length
     }
   };
+  if (aiConfig) {
+    overview.ai = { configured: aiEnabled, provider: aiConfig.provider, model: aiConfig.model };
+  }
   if (blueprint) {
     overview.blueprint = {
       sections: blueprint.sections.length,

@@ -126,10 +126,14 @@
         "command": "engineeringos.runExecutableGuardrails",
         "title": "EngineeringOS: Run Executable Guardrails"
       },
-      {
-        "command": "engineeringos.healthReport",
-        "title": "EngineeringOS: Health Report"
-      }
+			{
+				"command": "engineeringos.healthReport",
+				"title": "EngineeringOS: Health Report"
+			},
+			{
+				"command": "engineeringos.configureAI",
+				"title": "EngineeringOS: Configure AI Key"
+			}
     ],
     "viewsContainers": {
       "activitybar": [
