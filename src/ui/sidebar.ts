@@ -93,6 +93,13 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
   }
 
   private async handleOnboarding(payload: OnboardingInput & { users: string[]; capabilities: string[] }): Promise<void> {
+    // Load secret key before building model
+    if (this.extensionContext) {
+      const config = await this.engine.repository.loadConfig();
+      const provider = config?.ai?.provider || 'openrouter';
+      this.engine.secretApiKey = await this.extensionContext.secrets.get(`engineeringos.ai.apiKey.${provider}`);
+    }
+
     const projectId = payload.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
     const result = await this.engine.buildOnboardingModel({
       projectName: payload.projectName,
@@ -231,6 +238,13 @@ export class EngineeringOSSidebarProvider implements vscode.WebviewViewProvider 
     };
 
     try {
+      // Load secret key before building model
+      if (this.extensionContext) {
+        const config = await this.engine.repository.loadConfig();
+        const provider = config?.ai?.provider || 'openrouter';
+        this.engine.secretApiKey = await this.extensionContext.secrets.get(`engineeringos.ai.apiKey.${provider}`);
+      }
+
       const result = await this.engine.buildOnboardingModel(input, (phase, progress) => {
         if (this.view) {
           this.view.webview.postMessage({ type: 'wizard.progress', phase, progress });
