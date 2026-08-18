@@ -3,17 +3,47 @@
   "displayName": "EngineeringOS",
   "description": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
   "version": "0.1.0",
-  "publisher": "engineeringos",
+  "publisher": "bindejohn120",
+  "author": {
+    "name": "bindejohn120"
+  },
   "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bindejohn120/engineeringos"
+  },
+  "bugs": {
+    "url": "https://github.com/bindejohn120/engineeringos/issues"
+  },
+  "homepage": "https://github.com/bindejohn120/engineeringos#readme",
+  "keywords": [
+    "engineering",
+    "ai",
+    "architecture",
+    "guardrails",
+    "mental-model",
+    "blueprint",
+    "quality",
+    "verification",
+    "domain-driven-design",
+    "coding-agent"
+  ],
+  "categories": [
+    "Other",
+    "Linters",
+    "Programming Languages"
+  ],
+  "galleryBanner": {
+    "color": "#0d1117",
+    "theme": "dark"
+  },
   "bin": {
     "engineeringos": "./dist/cli.js"
   },
   "engines": {
     "vscode": "^1.90.0"
   },
-  "categories": [
-    "Other"
-  ],
   "activationEvents": [
     "onStartupFinished"
   ],

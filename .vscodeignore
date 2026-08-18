@@ -4,5 +4,11 @@
 src/**
 node_modules/**
 .gitignore
-.engineeringos/evidence/**
-.engineeringos/sessions/**
+.engineeringos/**
+scripts/**
+*.test.ts
+vitest.config.ts
+tsconfig.json
+UPGRADE_PLAN.md
+ENGINEERINGOS_GAP_ANALYSIS.md
+ENGINEERINGOS_ARCHITECTURE.md
