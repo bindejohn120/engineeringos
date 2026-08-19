@@ -133,6 +133,22 @@
 			{
 				"command": "engineeringos.configureAI",
 				"title": "EngineeringOS: Configure AI Key"
+			},
+			{
+				"command": "engineeringos.createWorktree",
+				"title": "EngineeringOS: Create Worktree"
+			},
+			{
+				"command": "engineeringos.removeWorktree",
+				"title": "EngineeringOS: Remove Worktree"
+			},
+			{
+				"command": "engineeringos.listWorktrees",
+				"title": "EngineeringOS: List Worktrees"
+			},
+			{
+				"command": "engineeringos.codeReview",
+				"title": "EngineeringOS: Code Review"
 			}
     ],
     "viewsContainers": {

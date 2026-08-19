@@ -24,7 +24,11 @@ const COMMANDS = [
   'engineeringos.openBlueprint',
   'engineeringos.analyzeRepository',
   'engineeringos.runExecutableGuardrails',
-  'engineeringos.healthReport'
+  'engineeringos.healthReport',
+  'engineeringos.createWorktree',
+  'engineeringos.removeWorktree',
+  'engineeringos.listWorktrees',
+  'engineeringos.codeReview'
 ] as const;
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -274,6 +278,87 @@ export function activate(context: vscode.ExtensionContext): void {
           await vscode.window.showErrorMessage(`Health report failed: ${err instanceof Error ? err.message : String(err)}`);
         }
       });
+    },
+
+    'engineeringos.createWorktree': async () => {
+      const ws = vscode.workspace.workspaceFolders?.[0];
+      if (!ws) return;
+      const cwd = ws.uri.fsPath;
+      const input = await vscode.window.showInputBox({ prompt: 'Branch name for new worktree', placeHolder: 'feature/my-change', validateInput: (v) => v.trim() ? null : 'Branch name required' });
+      if (!input) return;
+      const branch = input.trim();
+      const wtPath = `${cwd}-wt-${branch.replace(/[^a-zA-Z0-9]/g, '-')}`;
+      const { clean, reason } = await engine.ensureCleanBaseline();
+      if (!clean) {
+        void vscode.window.showWarningMessage(`Cannot create worktree: ${reason}`);
+        return;
+      }
+      await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: `Creating worktree: ${branch}...` }, async () => {
+        const ok = await engine.createWorktree(branch, wtPath);
+        if (ok) {
+          void vscode.window.showInformationMessage(`Worktree created at ${wtPath} (branch: ${branch})`);
+        } else {
+          void vscode.window.showErrorMessage(`Failed to create worktree for branch: ${branch}`);
+        }
+      });
+    },
+
+    'engineeringos.removeWorktree': async () => {
+      const ws = vscode.workspace.workspaceFolders?.[0];
+      if (!ws) return;
+      const worktrees = await engine.listWorktrees();
+      if (worktrees.length === 0) {
+        void vscode.window.showInformationMessage('No worktrees found.');
+        return;
+      }
+      const items = worktrees.map((wt) => ({ label: wt.branch ?? wt.path, description: wt.path, worktreePath: wt.path }));
+      const picked = await vscode.window.showQuickPick(items, { placeHolder: 'Select worktree to remove' });
+      if (!picked) return;
+      const ok = await engine.removeWorktree(picked.worktreePath);
+      if (ok) {
+        void vscode.window.showInformationMessage(`Worktree removed: ${picked.worktreePath}`);
+      } else {
+        void vscode.window.showErrorMessage(`Failed to remove worktree: ${picked.worktreePath}`);
+      }
+    },
+
+    'engineeringos.listWorktrees': async () => {
+      const worktrees = await engine.listWorktrees();
+      if (worktrees.length === 0) {
+        void vscode.window.showInformationMessage('No worktrees found.');
+        return;
+      }
+      const lines: string[] = ['# Git Worktrees', ''];
+      for (const wt of worktrees) {
+        lines.push(`- **${wt.branch ?? 'detached'}** — ${wt.path}${wt.locked ? ' (locked)' : ''}`);
+      }
+      await openMarkdown(lines.join('\n'));
+    },
+
+    'engineeringos.codeReview': async () => {
+      const result = await withInitialized(async () => {
+        const report = await engine.codeReview();
+        return report;
+      });
+      if (!result) return;
+      const lines: string[] = ['# Code Review Report', '', `**Verdict:** ${result.verdict}`, ''];
+      if (result.findings.length > 0) {
+        lines.push('## Findings', '');
+        for (const f of result.findings) {
+          const icon = f.severity === 'block' ? 'BLOCK' : f.severity === 'review' ? 'REVIEW' : 'INFO';
+          lines.push(`### [${icon}] ${f.title}`);
+          lines.push(`${f.description}`, '');
+          if (f.evidence.length > 0) {
+            lines.push('**Evidence:**');
+            for (const e of f.evidence) lines.push(`- ${e}`);
+            lines.push('');
+          }
+          if (f.recommendation) lines.push(`**Recommendation:** ${f.recommendation}`, '');
+        }
+      }
+      if (result.summary) lines.push('## Summary', '', result.summary);
+      await openMarkdown(lines.join('\n'));
+      void vscode.window.showInformationMessage(`Code Review: ${result.verdict} (${result.findings.length} finding${result.findings.length === 1 ? '' : 's'})`);
     }
   };
 

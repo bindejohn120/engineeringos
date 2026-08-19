@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 10,
+  "modelVersion": 3,
   "guardrails": [
     {
       "id": "GR-001",
@@ -479,6 +479,26 @@
       ]
     },
     {
+      "id": "tpl-tdd-test-before-code",
+      "name": "TDD: Tests must exist before implementation",
+      "rule": "Every implementation file must have a corresponding test file. No production code without a test.",
+      "severity": "blocking",
+      "scope": [
+        "src/**",
+        "lib/**",
+        "app/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: verify test files exist for all source files"
+      ],
+      "reason": "Test-driven development requires tests to exist alongside or before production code. Code without tests is unverifiable.",
+      "verification": [
+        "Verify each .ts/.js source file has a corresponding .test.ts/.test.js file"
+      ]
+    },
+    {
       "id": "tpl-perf-connection-pool",
       "name": "Performance: Connection pool configuration",
       "rule": "Database connection pools must have min and max limits configured.",
@@ -607,6 +627,76 @@
       ]
     },
     {
+      "id": "tpl-tdd-coverage-threshold",
+      "name": "TDD: Minimum test coverage",
+      "rule": "New code must maintain minimum 80% line coverage. Coverage configuration must exist.",
+      "severity": "warning",
+      "scope": [
+        "**/*.test.ts",
+        "**/*.test.js",
+        "jest.config.*",
+        "vitest.config.*",
+        ".nycrc*"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: enforce coverage threshold in test runner config"
+      ],
+      "reason": "Coverage thresholds ensure new code is actually tested, not just that test files exist.",
+      "verification": [
+        "Verify test runner config exists with coverage threshold >= 80%"
+      ]
+    },
+    {
+      "id": "tpl-tdd-no-skip-test",
+      "name": "TDD: No skipped or pending tests in production",
+      "rule": "Test files must not contain skipped (.skip), pending (.only), or disabled (xit/xdescribe) tests in committed code.",
+      "severity": "warning",
+      "scope": [
+        "**/*.test.ts",
+        "**/*.test.js",
+        "**/*.spec.ts",
+        "**/*.spec.js"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "\\.skip\\(",
+        "\\.only\\(",
+        "\\bxit\\(",
+        "\\bxdescribe\\(",
+        "\\bpending\\("
+      ],
+      "enforcement": [
+        "CI: reject commits containing skipped tests"
+      ],
+      "reason": "Skipped tests create false confidence. Every test must be active or explicitly removed, never hidden.",
+      "verification": [
+        "Verify no .skip(), .only(), xit(), xdescribe(), or pending() calls exist in test files"
+      ]
+    },
+    {
+      "id": "tpl-tdd-assertion-minimum",
+      "name": "TDD: Tests must have assertions",
+      "rule": "Every test function must contain at least one assertion (expect/ assert/ should).",
+      "severity": "warning",
+      "scope": [
+        "**/*.test.ts",
+        "**/*.test.js",
+        "**/*.spec.ts",
+        "**/*.spec.js"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: lint rule to verify assertions in test blocks"
+      ],
+      "reason": "A test without assertions validates nothing. It runs code but never checks the result.",
+      "verification": [
+        "Verify each test block contains at least one expect(), assert(), or should call"
+      ]
+    },
+    {
       "id": "tpl-perf-batch-operations",
       "name": "Performance: Batch database operations",
       "rule": "Bulk inserts and updates must use batch operations (createMany, upsertMany) instead of individual inserts in loops.",
@@ -625,8 +715,28 @@
       "verification": [
         "Verify bulk data operations use createMany or equivalent batch APIs"
       ]
+    },
+    {
+      "id": "tpl-tdd-red-green-refactor",
+      "name": "TDD: RED-GREEN-REFACTOR commit discipline",
+      "rule": "Implementation commits should follow RED-GREEN-REFACTOR: first commit adds failing test, second adds minimal passing code, third refactors.",
+      "severity": "advisory",
+      "scope": [
+        "src/**",
+        "lib/**",
+        "app/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Code review: verify test-first in commit history"
+      ],
+      "reason": "RED-GREEN-REFACTOR ensures tests drive design, not afterthoughts. Each commit is either red, green, or refactor — never all three.",
+      "verification": [
+        "Verify commit messages or PRs show test-first progression"
+      ]
     }
   ],
-  "updatedAt": "2026-08-17T17:31:45.586Z",
-  "basedOnCommit": null
+  "updatedAt": "2026-08-19T02:06:52.538Z",
+  "basedOnCommit": "97339eefa305cecfedad75c203b7b7de85e08e9d"
 }

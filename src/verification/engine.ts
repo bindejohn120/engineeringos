@@ -18,6 +18,8 @@ export interface VerificationInput {
   files: string[];
   guardrailEngine: GuardrailEngineResult;
   drift: DriftReport;
+  tests?: string[];
+  git?: { branch: string | null; currentCommit: string | null };
 }
 
 export function verifyRequirements(input: Pick<VerificationInput, 'map'>): VerificationResult {
@@ -130,14 +132,88 @@ export function verifyModelConsistency(input: Pick<VerificationInput, 'mentalMod
   return { check: 'Model Consistency', verdict, evidence, notVerified };
 }
 
+export function verifyTDD(input: Pick<VerificationInput, 'files' | 'tests'>): VerificationResult {
+  const { files } = input;
+  const evidence: string[] = [];
+  const notVerified: string[] = [];
+
+  const sourceExtensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py', '.java', '.go', '.rb', '.php', '.cs'];
+  const testExtensions = ['.test.ts', '.test.js', '.spec.ts', '.spec.js'];
+
+  const sourceFiles = files.filter((f) => sourceExtensions.some((ext) => f.endsWith(ext)) && !f.includes('node_modules'));
+  const testFiles = files.filter((f) => testExtensions.some((ext) => f.endsWith(ext)) && !f.includes('node_modules'));
+
+  if (sourceFiles.length === 0) {
+    return { check: 'TDD', verdict: 'PASS', evidence: ['No source files to check.'], notVerified: [] };
+  }
+
+  if (input.tests === undefined) {
+    return { check: 'TDD', verdict: 'PASS', evidence: [`${sourceFiles.length} source files. TDD check not configured (no test data provided).`], notVerified: [] };
+  }
+
+  evidence.push(`${sourceFiles.length} source files, ${testFiles.length} test files.`);
+
+  const untested: string[] = [];
+  for (const src of sourceFiles) {
+    const base = src.replace(/\.(ts|tsx|js|jsx|mjs|cjs)$/, '');
+    const hasTest = testFiles.some((t) => t.startsWith(base));
+    if (!hasTest) untested.push(src);
+  }
+
+  if (untested.length > 0) {
+    for (const f of untested.slice(0, 5)) {
+      notVerified.push(`No test file for: ${f}`);
+    }
+    if (untested.length > 5) {
+      notVerified.push(`... and ${untested.length - 5} more files without tests.`);
+    }
+  }
+
+  evidence.push(`${sourceFiles.length - untested.length}/${sourceFiles.length} source files have tests.`);
+
+  const testRatio = testFiles.length / sourceFiles.length;
+  if (untested.length > 0) {
+    return { check: 'TDD', verdict: 'REVIEW', evidence, notVerified };
+  }
+  if (testRatio < 0.5) {
+    return { check: 'TDD', verdict: 'REVIEW', evidence: [...evidence, 'Low test-to-source ratio.'], notVerified: [] };
+  }
+  return { check: 'TDD', verdict: 'PASS', evidence, notVerified };
+}
+
+export function verifyBranch(input: Pick<VerificationInput, 'git'>): VerificationResult | null {
+  if (!input.git) return null;
+  const { branch, currentCommit } = input.git;
+  const evidence: string[] = [];
+  const notVerified: string[] = [];
+
+  if (!branch) {
+    return { check: 'Branch', verdict: 'REVIEW', evidence: ['Not on a named branch.'], notVerified: ['branch status'] };
+  }
+
+  evidence.push(`On branch: ${branch}`);
+  if (currentCommit) evidence.push(`HEAD: ${currentCommit.slice(0, 8)}`);
+
+  const isMain = branch === 'main' || branch === 'master' || branch === 'develop';
+  if (isMain) {
+    return { check: 'Branch', verdict: 'REVIEW', evidence: [...evidence, 'Working directly on main branch.'], notVerified: ['isolated worktree for changes'] };
+  }
+
+  return { check: 'Branch', verdict: 'PASS', evidence, notVerified };
+}
+
 export function runVerification(input: VerificationInput): VerificationReport {
   const results = [
     verifyRequirements(input),
     verifyArchitecture(input),
     verifyGuardrails(input),
     verifyInvariants(input),
-    verifyModelConsistency(input)
+    verifyModelConsistency(input),
+    verifyTDD(input),
   ];
+
+  const branchResult = verifyBranch(input);
+  if (branchResult) results.push(branchResult);
 
   for (const finding of input.drift.findings) {
     results.push({

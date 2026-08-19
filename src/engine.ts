@@ -16,7 +16,7 @@ import { FileExportAdapter, type AgentContext, type AgentState } from './agents/
 import { EngineeringOSRepository } from './storage/repository';
 import { scanWorkspace, buildImportRecords } from './analyzer/source';
 import { readPackageDependencyList } from './analyzer/dependencies';
-import { getCurrentCommit, getGitState, type GitState } from './analyzer/git';
+import { getCurrentCommit, getGitState, createWorktree, removeWorktree, listWorktrees, ensureCleanBaseline, type GitState } from './analyzer/git';
 import { runGuardrailEngine, type GuardrailEngineResult } from './guardrails/engine';
 import { detectDrift } from './drift/engine';
 import { runVerification } from './verification/engine';
@@ -362,6 +362,8 @@ export class EngineeringOSEngine {
     const files = analysis.files ?? [];
     const imports = await buildImportRecords(files);
     const dependencies = await readPackageDependencyList(this.workspacePath);
+    const git = await getGitState(this.workspacePath);
+    const filePaths = analysis.filePaths ?? files.map((f) => f.relativePath);
 
     const guardrailEngine = runGuardrailEngine({
       guardrails: state.guardrails.guardrails,
@@ -373,7 +375,7 @@ export class EngineeringOSEngine {
     const drift = detectDrift({
       map: state.map,
       mentalModel: state.mentalModel,
-      files: analysis.filePaths ?? files.map((f) => f.relativePath),
+      files: filePaths,
       guardrailResults: guardrailEngine.results
     });
 
@@ -381,9 +383,11 @@ export class EngineeringOSEngine {
       map: state.map,
       mentalModel: state.mentalModel,
       guardrails: state.guardrails.guardrails,
-      files: analysis.filePaths ?? files.map((f) => f.relativePath),
+      files: filePaths,
       guardrailEngine,
-      drift
+      drift,
+      tests: filePaths.filter((f) => /\.test\./.test(f)),
+      git: { branch: git.branch, currentCommit: git.currentCommit }
     });
 
     return { guardrails: guardrailEngine, drift, verification };
@@ -551,6 +555,80 @@ export class EngineeringOSEngine {
       cyclesDetected: 0,
       changeConcentration: 0
     });
+  }
+
+  // ─── Git Worktree ─────────────────────────────────────────────────────────
+  async createWorktree(branch: string, worktreePath: string): Promise<boolean> {
+    return createWorktree(this.workspacePath, branch, worktreePath);
+  }
+
+  async removeWorktree(worktreePath: string): Promise<boolean> {
+    return removeWorktree(this.workspacePath, worktreePath);
+  }
+
+  async listWorktrees(): Promise<import('./analyzer/git').WorktreeInfo[]> {
+    return listWorktrees(this.workspacePath);
+  }
+
+  async ensureCleanBaseline(): Promise<{ clean: boolean; reason?: string }> {
+    return ensureCleanBaseline(this.workspacePath);
+  }
+
+  // ─── Code Review ──────────────────────────────────────────────────────────
+  async codeReview(): Promise<{ verdict: 'PASS' | 'REVIEW' | 'BLOCK'; findings: Array<{ title: string; description: string; severity: 'block' | 'review' | 'info'; evidence: string[]; recommendation?: string }>; summary: string }> {
+    const state = await this.loadStateOrThrow();
+    const git = await getGitState(this.workspacePath);
+    const analysis = await this.analyzeWorkspace();
+    const files = analysis.files ?? [];
+    const filePaths = analysis.filePaths ?? files.map((f) => f.relativePath);
+    const imports = await buildImportRecords(files);
+    const dependencies = await readPackageDependencyList(this.workspacePath);
+
+    const guardrailEngine = runGuardrailEngine({
+      guardrails: state.guardrails.guardrails,
+      files,
+      imports,
+      dependencies: dependencies.map((d) => d.name)
+    });
+
+    const drift = detectDrift({
+      map: state.map,
+      mentalModel: state.mentalModel,
+      files: filePaths,
+      guardrailResults: guardrailEngine.results
+    });
+
+    const verification = runVerification({
+      map: state.map,
+      mentalModel: state.mentalModel,
+      guardrails: state.guardrails.guardrails,
+      files: filePaths,
+      guardrailEngine,
+      drift,
+      tests: filePaths.filter((f) => /\.test\./.test(f)),
+      git: { branch: git.branch, currentCommit: git.currentCommit }
+    });
+
+    const findings: Array<{ title: string; description: string; severity: 'block' | 'review' | 'info'; evidence: string[]; recommendation?: string }> = [];
+
+    for (const r of verification.results) {
+      if (r.verdict === 'PASS') continue;
+      const severity = r.verdict === 'BLOCK' ? 'block' as const : 'review' as const;
+      findings.push({
+        title: r.check,
+        description: r.notVerified.join('; ') || 'Requires review',
+        severity,
+        evidence: r.evidence,
+        recommendation: r.verdict === 'BLOCK' ? `Fix blocking issue: ${r.check}` : undefined
+      });
+    }
+
+    const blockCount = findings.filter((f) => f.severity === 'block').length;
+    const reviewCount = findings.filter((f) => f.severity === 'review').length;
+    const verdict = blockCount > 0 ? 'BLOCK' : reviewCount > 0 ? 'REVIEW' : 'PASS';
+    const summary = `Review complete: ${blockCount} blocking, ${reviewCount} review items. Overall: ${verdict}`;
+
+    return { verdict, findings, summary };
   }
 }
 
@@ -1100,6 +1178,40 @@ function createInitialMentalModel(input: OnboardingInput): MentalModel {
     scope: [],
     enforcement: ['EngineeringOS drift detection'],
     verification: ['engineeringos.verify']
+  });
+
+  // TDD invariants.
+  model = addInvariant(model, {
+    id: 'INV-TDD-001',
+    statement: 'Every implementation file has a corresponding test file.',
+    severity: 'blocking',
+    scope: ['src', 'lib', 'app'],
+    enforcement: ['CI: verify test files exist for all source files'],
+    verification: ['coverage report', 'test file existence check']
+  });
+  model = addInvariant(model, {
+    id: 'INV-TDD-002',
+    statement: 'No skipped or pending tests exist in committed code.',
+    severity: 'warning',
+    scope: ['tests'],
+    enforcement: ['CI: reject commits with .skip() or .only()'],
+    verification: ['lint rule', 'test audit']
+  });
+  model = addInvariant(model, {
+    id: 'INV-TDD-003',
+    statement: 'Every test contains at least one assertion.',
+    severity: 'warning',
+    scope: ['tests'],
+    enforcement: ['CI: lint rule to verify assertions in test blocks'],
+    verification: ['test audit']
+  });
+  model = addInvariant(model, {
+    id: 'INV-TDD-004',
+    statement: 'Test coverage must meet minimum threshold (80% lines).',
+    severity: 'warning',
+    scope: ['src', 'lib', 'app'],
+    enforcement: ['CI: enforce coverage threshold in test runner config'],
+    verification: ['coverage report']
   });
 
   // Domain-specific invariants from wizard input.

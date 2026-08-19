@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 10,
-  "updatedAt": "2026-08-17T17:31:45.578Z",
-  "basedOnCommit": null,
+  "modelVersion": 3,
+  "updatedAt": "2026-08-19T02:06:52.529Z",
+  "basedOnCommit": "97339eefa305cecfedad75c203b7b7de85e08e9d",
   "systemUnderstanding": {
     "purpose": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
     "primaryUsers": [
@@ -385,6 +385,68 @@
       "verification": [
         "engineeringos.verify"
       ]
+    },
+    {
+      "id": "INV-TDD-001",
+      "statement": "Every implementation file has a corresponding test file.",
+      "severity": "blocking",
+      "scope": [
+        "src",
+        "lib",
+        "app"
+      ],
+      "enforcement": [
+        "CI: verify test files exist for all source files"
+      ],
+      "verification": [
+        "coverage report",
+        "test file existence check"
+      ]
+    },
+    {
+      "id": "INV-TDD-002",
+      "statement": "No skipped or pending tests exist in committed code.",
+      "severity": "warning",
+      "scope": [
+        "tests"
+      ],
+      "enforcement": [
+        "CI: reject commits with .skip() or .only()"
+      ],
+      "verification": [
+        "lint rule",
+        "test audit"
+      ]
+    },
+    {
+      "id": "INV-TDD-003",
+      "statement": "Every test contains at least one assertion.",
+      "severity": "warning",
+      "scope": [
+        "tests"
+      ],
+      "enforcement": [
+        "CI: lint rule to verify assertions in test blocks"
+      ],
+      "verification": [
+        "test audit"
+      ]
+    },
+    {
+      "id": "INV-TDD-004",
+      "statement": "Test coverage must meet minimum threshold (80% lines).",
+      "severity": "warning",
+      "scope": [
+        "src",
+        "lib",
+        "app"
+      ],
+      "enforcement": [
+        "CI: enforce coverage threshold in test runner config"
+      ],
+      "verification": [
+        "coverage report"
+      ]
     }
   ],
   "stateMachines": [],
@@ -519,7 +581,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-17T17:31:45.436Z",
+      "date": "2026-08-19T02:06:52.399Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -543,7 +605,7 @@
         "payment-gateway"
       ],
       "status": "proposed",
-      "date": "2026-08-17T17:31:45.436Z",
+      "date": "2026-08-19T02:06:52.399Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -573,7 +635,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-17T17:31:45.436Z",
+      "date": "2026-08-19T02:06:52.399Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -596,7 +658,7 @@
         "observability"
       ],
       "status": "proposed",
-      "date": "2026-08-17T17:31:45.436Z",
+      "date": "2026-08-19T02:06:52.399Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -619,7 +681,7 @@
         "config"
       ],
       "status": "proposed",
-      "date": "2026-08-17T17:31:45.436Z",
+      "date": "2026-08-19T02:06:52.399Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."

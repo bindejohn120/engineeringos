@@ -62,3 +62,61 @@ export async function getGitState(cwd: string): Promise<GitState> {
 export async function getCurrentCommit(cwd: string): Promise<string | null> {
   return runGit(cwd, ['rev-parse', 'HEAD']);
 }
+
+export interface WorktreeInfo {
+  path: string;
+  branch: string;
+  HEAD: string;
+  bare: boolean;
+  locked: boolean;
+}
+
+export async function listWorktrees(cwd: string): Promise<WorktreeInfo[]> {
+  const raw = await runGit(cwd, ['worktree', 'list', '--porcelain']);
+  if (!raw) return [];
+  const worktrees: WorktreeInfo[] = [];
+  let current: Partial<WorktreeInfo> = {};
+  for (const line of raw.split('\n')) {
+    if (line.startsWith('worktree ')) {
+      if (current.path) worktrees.push(current as WorktreeInfo);
+      current = { path: line.slice('worktree '.length) };
+    } else if (line.startsWith('HEAD ')) {
+      current.HEAD = line.slice('HEAD '.length);
+    } else if (line.startsWith('branch ')) {
+      current.branch = line.slice('branch '.length);
+    } else if (line.startsWith('bare')) {
+      current.bare = true;
+    } else if (line.startsWith('locked')) {
+      current.locked = true;
+    } else if (line === '') {
+      if (current.path) worktrees.push(current as WorktreeInfo);
+      current = {};
+    }
+  }
+  if (current.path) worktrees.push(current as WorktreeInfo);
+  return worktrees;
+}
+
+export async function createWorktree(cwd: string, branch: string, worktreePath: string): Promise<boolean> {
+  const result = await runGit(cwd, ['worktree', 'add', '-b', branch, worktreePath, 'HEAD']);
+  return result !== null;
+}
+
+export async function removeWorktree(cwd: string, worktreePath: string): Promise<boolean> {
+  const result = await runGit(cwd, ['worktree', 'remove', worktreePath, '--force']);
+  return result !== null;
+}
+
+export async function isWorktreeClean(cwd: string): Promise<boolean> {
+  const raw = await runGit(cwd, ['status', '--porcelain']);
+  return raw === '';
+}
+
+export async function ensureCleanBaseline(cwd: string): Promise<{ clean: boolean; reason?: string }> {
+  const isClean = await isWorktreeClean(cwd);
+  if (!isClean) {
+    const state = await getGitState(cwd);
+    return { clean: false, reason: `Working directory has ${state.changedFiles.length} uncommitted change(s). Commit or stash before starting work.` };
+  }
+  return { clean: true };
+}
