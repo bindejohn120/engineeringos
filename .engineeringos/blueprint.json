@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 9,
-  "updatedAt": "2026-08-21T14:34:03.414Z",
-  "basedOnCommit": "cf7a8ce1f7212555badb7b436c20518950896c68",
+  "modelVersion": 13,
+  "updatedAt": "2026-08-21T14:42:25.682Z",
+  "basedOnCommit": "808c18d9cbbc91a396996a86fa75784f660b9d2e",
   "projectId": "engineeringos-extension",
   "projectName": "EngineeringOS",
   "version": "1.0",
@@ -229,5 +229,5 @@
       ]
     }
   ],
-  "generatedAt": "2026-08-21T14:34:03.228Z"
+  "generatedAt": "2026-08-21T14:42:25.371Z"
 }

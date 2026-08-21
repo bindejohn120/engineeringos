@@ -129,4 +129,31 @@ describe('EngineeringOSEngine integration', () => {
   it('throws when not initialized', async () => {
     await expect(engine.prepareContext('x')).rejects.toThrow(/not initialized/);
   });
+
+  it('runs code review and returns structured findings', async () => {
+    await engine.buildOnboardingModel({
+      projectName: 'X',
+      projectId: 'x',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['feature']
+    });
+    fs.writeFileSync(
+      path.join(dir, 'src', 'client', 'app.ts'),
+      "import { db } from '../db';",
+      'utf-8'
+    );
+    const review = await engine.codeReview();
+    expect(['PASS', 'REVIEW', 'BLOCK']).toContain(review.verdict);
+    expect(Array.isArray(review.findings)).toBe(true);
+    expect(typeof review.summary).toBe('string');
+    expect(review.summary.length).toBeGreaterThan(0);
+    if (review.findings.length > 0) {
+      const f = review.findings[0];
+      expect(typeof f.title).toBe('string');
+      expect(typeof f.description).toBe('string');
+      expect(['block', 'review', 'info']).toContain(f.severity);
+      expect(Array.isArray(f.evidence)).toBe(true);
+    }
+  });
 });
