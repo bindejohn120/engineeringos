@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 4,
+  "modelVersion": 5,
   "guardrails": [
     {
       "id": "GR-001",
@@ -460,53 +460,6 @@
       "reason": "String concatenation in SQL enables injection attacks that can read, modify, or delete data.",
       "verification": [
         "Verify all SQL queries use parameterized statements"
-      ]
-    },
-    {
-      "id": "tpl-docker-no-root",
-      "name": "Docker: Containers must not run as root",
-      "rule": "Dockerfiles must contain USER directive with non-root user.",
-      "severity": "blocking",
-      "scope": [
-        "Dockerfile",
-        "**/Dockerfile",
-        "**/*.dockerfile"
-      ],
-      "allowedPatterns": [],
-      "forbiddenPatterns": [],
-      "enforcement": [
-        "CI: verify Dockerfile has USER directive"
-      ],
-      "reason": "Running as root gives containers unnecessary privileges, increasing attack surface.",
-      "verification": [
-        "Verify Dockerfile contains USER directive with non-root user"
-      ]
-    },
-    {
-      "id": "tpl-docker-no-secrets-in-build",
-      "name": "Docker: No secrets in build args or ENV",
-      "rule": "Dockerfiles must not embed secrets in ARG or ENV instructions.",
-      "severity": "blocking",
-      "scope": [
-        "Dockerfile",
-        "**/Dockerfile",
-        "**/*.dockerfile"
-      ],
-      "allowedPatterns": [],
-      "forbiddenPatterns": [
-        "ARG\\s+.*KEY",
-        "ARG\\s+.*SECRET",
-        "ARG\\s+.*PASSWORD",
-        "ENV\\s+.*KEY=",
-        "ENV\\s+.*SECRET=",
-        "ENV\\s+.*PASSWORD="
-      ],
-      "enforcement": [
-        "lint rule: hadolint DL3003"
-      ],
-      "reason": "Secrets in Dockerfiles are baked into image layers and visible in image history.",
-      "verification": [
-        "Verify no secrets in Dockerfile ARG/ENV instructions"
       ]
     },
     {
@@ -970,28 +923,6 @@
       ]
     },
     {
-      "id": "tpl-docker-no-latest",
-      "name": "Docker: Do not use :latest tag",
-      "rule": "FROM directives must pin specific image versions, not :latest.",
-      "severity": "warning",
-      "scope": [
-        "Dockerfile",
-        "**/Dockerfile",
-        "**/*.dockerfile"
-      ],
-      "allowedPatterns": [],
-      "forbiddenPatterns": [
-        "FROM\\s+\\S+:latest"
-      ],
-      "enforcement": [
-        "Lint rule: hadolint DL3007"
-      ],
-      "reason": ":latest tag causes non-reproducible builds and unexpected behavior on rebuilds.",
-      "verification": [
-        "Verify all FROM directives use pinned versions"
-      ]
-    },
-    {
       "id": "tpl-iac-enable-logging",
       "name": "Infrastructure: Enable logging and monitoring",
       "rule": "Cloud resources must have logging enabled (CloudWatch, Stackdriver, etc.).",
@@ -1255,8 +1186,71 @@
       "verification": [
         "Verify each test block contains at least one expect(), assert(), or should call"
       ]
+    },
+    {
+      "id": "tpl-testing-component-render",
+      "name": "Testing: Components must have render tests",
+      "rule": "Every UI component must have at least one render/snapshot test.",
+      "severity": "warning",
+      "scope": [
+        "**/*.test.tsx",
+        "**/*.test.jsx",
+        "**/*.spec.tsx",
+        "**/*.spec.jsx"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: verify component test files exist"
+      ],
+      "reason": "Render tests catch regression bugs in component output and prevent visual drift.",
+      "verification": [
+        "Verify component test files exist for all UI components"
+      ]
+    },
+    {
+      "id": "tpl-api-response-envelope",
+      "name": "API: Consistent response envelope",
+      "rule": "API responses must use consistent envelope: { data, error, meta }.",
+      "severity": "advisory",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Code review: consistent response shape"
+      ],
+      "reason": "Inconsistent response shapes make frontend integration error-prone and difficult to maintain.",
+      "verification": [
+        "Verify API responses use consistent envelope format"
+      ]
+    },
+    {
+      "id": "tpl-error-structured-format",
+      "name": "Errors: Structured error responses",
+      "rule": "Error responses must follow RFC 7807 Problem Details format or consistent structure.",
+      "severity": "advisory",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Code review: consistent error format"
+      ],
+      "reason": "Structured errors enable automatic retry logic and consistent client-side error handling.",
+      "verification": [
+        "Verify error responses follow consistent format"
+      ]
     }
   ],
-  "updatedAt": "2026-08-21T13:11:37.938Z",
-  "basedOnCommit": "18fb1abb7fde03339e3de4eac9e69a77f3f2543c"
+  "updatedAt": "2026-08-21T14:34:02.464Z",
+  "basedOnCommit": "cf7a8ce1f7212555badb7b436c20518950896c68"
 }

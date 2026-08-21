@@ -118,4 +118,89 @@ describe('generateContextualGuardrails', () => {
       expect(typeof g.reason).toBe('string');
     }
   });
+
+  it('filters by language — TypeScript includes React templates', () => {
+    const withTs = generateContextualGuardrails({
+      frameworks: ['react'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      languages: ['typescript'],
+    });
+    const withPython = generateContextualGuardrails({
+      frameworks: ['react'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      languages: ['python'],
+    });
+    expect(withTs.some(g => g.id === 'tpl-react-no-direct-dom')).toBe(true);
+    expect(withPython.some(g => g.id === 'tpl-react-no-direct-dom')).toBe(false);
+  });
+
+  it('filters by runtime — Docker templates only appear with docker runtime', () => {
+    const withDocker = generateContextualGuardrails({
+      frameworks: [],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      runtime: ['docker'],
+    });
+    const withoutDocker = generateContextualGuardrails({
+      frameworks: [],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      runtime: ['node'],
+    });
+    expect(withDocker.some(g => g.id === 'tpl-docker-no-root')).toBe(true);
+    expect(withoutDocker.some(g => g.id === 'tpl-docker-no-root')).toBe(false);
+  });
+
+  it('filters by runtime — React Native templates only appear with react-native runtime', () => {
+    const withRN = generateContextualGuardrails({
+      frameworks: ['react-native'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      runtime: ['react-native'],
+      languages: ['typescript'],
+    });
+    const withoutRN = generateContextualGuardrails({
+      frameworks: ['react-native'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      runtime: ['node'],
+      languages: ['typescript'],
+    });
+    expect(withRN.some(g => g.id === 'tpl-rn-flatlist-key')).toBe(true);
+    expect(withoutRN.some(g => g.id === 'tpl-rn-flatlist-key')).toBe(false);
+  });
+
+  it('omits language/runtime filtering when not provided', () => {
+    const base = generateContextualGuardrails({
+      frameworks: ['react'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+    });
+    const withLang = generateContextualGuardrails({
+      frameworks: ['react'],
+      databases: [],
+      domains: [],
+      compliance: [],
+      existingGuardrails: [],
+      languages: ['typescript'],
+    });
+    expect(base.some(g => g.id === 'tpl-react-no-direct-dom')).toBe(true);
+    expect(withLang.some(g => g.id === 'tpl-react-no-direct-dom')).toBe(true);
+  });
 });

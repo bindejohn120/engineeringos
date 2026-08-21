@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { runVerification } from '../verification/engine';
+import { runVerification, verifyBranch } from '../verification/engine';
 import { runGuardrailEngine } from '../guardrails/engine';
 import { detectDrift } from '../drift/engine';
 import { fixtureMap, fixtureMentalModel, fixtureGuardrails } from '../test/helpers';
@@ -79,5 +79,44 @@ describe('verification engine', () => {
   it('never reports false certainty for security', () => {
     const report = buildInput(CLEAN_FILES);
     expect(report.overall).not.toBe('BLOCK');
+  });
+});
+
+describe('verifyBranch', () => {
+  it('returns null when no git info provided', () => {
+    const result = verifyBranch({});
+    expect(result).toBeNull();
+  });
+
+  it('returns REVIEW on main branch', () => {
+    const result = verifyBranch({ git: { branch: 'main', currentCommit: 'abc123' } });
+    expect(result?.verdict).toBe('REVIEW');
+    expect(result?.evidence.some(e => e.includes('main'))).toBe(true);
+  });
+
+  it('returns REVIEW on master branch', () => {
+    const result = verifyBranch({ git: { branch: 'master', currentCommit: 'abc123' } });
+    expect(result?.verdict).toBe('REVIEW');
+  });
+
+  it('returns REVIEW on develop branch', () => {
+    const result = verifyBranch({ git: { branch: 'develop', currentCommit: 'abc123' } });
+    expect(result?.verdict).toBe('REVIEW');
+  });
+
+  it('returns PASS on feature branch', () => {
+    const result = verifyBranch({ git: { branch: 'feature/auth', currentCommit: 'abc123' } });
+    expect(result?.verdict).toBe('PASS');
+    expect(result?.evidence.some(e => e.includes('feature/auth'))).toBe(true);
+  });
+
+  it('returns REVIEW when branch is empty', () => {
+    const result = verifyBranch({ git: { branch: '', currentCommit: 'abc123' } });
+    expect(result?.verdict).toBe('REVIEW');
+  });
+
+  it('includes commit hash in evidence', () => {
+    const result = verifyBranch({ git: { branch: 'feature/x', currentCommit: 'abcdef123456' } });
+    expect(result?.evidence.some(e => e.includes('abcdef12'))).toBe(true);
   });
 });
