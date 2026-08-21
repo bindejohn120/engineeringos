@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 3,
-  "updatedAt": "2026-08-19T02:06:52.529Z",
-  "basedOnCommit": "97339eefa305cecfedad75c203b7b7de85e08e9d",
+  "modelVersion": 4,
+  "updatedAt": "2026-08-21T13:11:37.927Z",
+  "basedOnCommit": "18fb1abb7fde03339e3de4eac9e69a77f3f2543c",
   "systemUnderstanding": {
     "purpose": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
     "primaryUsers": [
@@ -447,6 +447,36 @@
       "verification": [
         "coverage report"
       ]
+    },
+    {
+      "id": "INV-OPS-001",
+      "statement": "All services have health check endpoints.",
+      "severity": "warning",
+      "scope": [
+        "ops",
+        "monitoring"
+      ],
+      "enforcement": [
+        "CI: verify health endpoint exists"
+      ],
+      "verification": [
+        "health endpoint test"
+      ]
+    },
+    {
+      "id": "INV-OPS-002",
+      "statement": "Application version is exposed via /health or /version endpoint.",
+      "severity": "advisory",
+      "scope": [
+        "ops",
+        "versioning"
+      ],
+      "enforcement": [
+        "CI: verify version endpoint"
+      ],
+      "verification": [
+        "version endpoint test"
+      ]
     }
   ],
   "stateMachines": [],
@@ -581,7 +611,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-19T02:06:52.399Z",
+      "date": "2026-08-21T13:11:37.764Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -605,7 +635,7 @@
         "payment-gateway"
       ],
       "status": "proposed",
-      "date": "2026-08-19T02:06:52.399Z",
+      "date": "2026-08-21T13:11:37.764Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -635,7 +665,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-19T02:06:52.399Z",
+      "date": "2026-08-21T13:11:37.764Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -658,7 +688,7 @@
         "observability"
       ],
       "status": "proposed",
-      "date": "2026-08-19T02:06:52.399Z",
+      "date": "2026-08-21T13:11:37.764Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -681,7 +711,7 @@
         "config"
       ],
       "status": "proposed",
-      "date": "2026-08-19T02:06:52.399Z",
+      "date": "2026-08-21T13:11:37.764Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."

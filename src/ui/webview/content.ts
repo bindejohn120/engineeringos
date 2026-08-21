@@ -223,12 +223,12 @@ li { margin-bottom: 2px; }
       { id: 'slaRequirements', label: 'SLA Requirements', type: 'textarea', placeholder: 'e.g. Support response < 4h for P1, RTO < 1h, RPO < 5min' }
     ]},
     { id: 'architecture', title: 'Architecture & Stack', description: 'Choose your stack and style (AI will recommend)', aiSuggestable: true, fields: [
-      { id: 'architectureStyle', label: 'Architecture Style', type: 'select', options: ['Auto (AI recommends)', 'Clean Architecture', 'Modular Monolith', 'Microservices', 'Layered', 'Event-Driven'] },
+      { id: 'architectureStyle', label: 'Architecture Style', type: 'select', options: ['Auto (AI recommends)', 'Clean Architecture', 'Modular Monolith', 'Microservices', 'Layered', 'Event-Driven', 'JAMstack', 'Server Components', 'Islands Architecture'] },
       { id: 'securityLevel', label: 'Security Level', type: 'select', options: ['Baseline', 'Hardened', 'Regulated'] },
-      { id: 'language', label: 'Language', type: 'text', placeholder: 'TypeScript, Go, Rust, Python' },
-      { id: 'runtime', label: 'Runtime', type: 'text', placeholder: 'Node.js 20, Bun, Deno' },
-      { id: 'framework', label: 'Framework', type: 'text', placeholder: 'NestJS, Express, Fastify, Next.js' },
-      { id: 'database', label: 'Database', type: 'text', placeholder: 'PostgreSQL, MongoDB, DynamoDB' },
+      { id: 'language', label: 'Language', type: 'text', placeholder: 'TypeScript, Python, Go, Dart, Kotlin' },
+      { id: 'runtime', label: 'Runtime', type: 'text', placeholder: 'Node.js, Bun, Deno, Browser, iOS, Android' },
+      { id: 'framework', label: 'Framework', type: 'text', placeholder: 'React, Next.js, Vue, NestJS, Flutter, Express' },
+      { id: 'database', label: 'Database', type: 'text', placeholder: 'PostgreSQL, MongoDB, SQLite, Firebase' },
       { id: 'blueprintText', label: 'Additional Requirements', type: 'textarea', placeholder: 'Paste a detailed spec, constraints, or requirements...' }
     ]}
   ];

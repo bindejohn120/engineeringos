@@ -14,7 +14,10 @@ export const ARCHITECTURE_STYLES = [
   'modular-monolith',
   'microservices',
   'layered',
-  'event-driven'
+  'event-driven',
+  'jamstack',
+  'server-components',
+  'islands-architecture'
 ] as const;
 
 export const SECURITY_LEVELS = ['baseline', 'hardened', 'regulated'] as const;
@@ -274,7 +277,99 @@ function buildSections(
         'Phase 4 — Hardening: load/security/reliability passes, observability, and the remaining invariants.',
         'Every phase ends with a green EngineeringOS verification and updated model evidence.'
       ]
-    )
+    ),
+    ...(isFrontendStyle(style) || hasFrontendFramework(input.options) ? [
+      section(
+        'ui-components',
+        'UI Component Architecture',
+        'Defines how components are organized, composed, and communicated.',
+        [
+          'Atomic design: atoms → molecules → organisms → templates → pages.',
+          'Components MUST be single-responsibility; one component does one thing well.',
+          'Presentational and container components MUST be separated; business logic stays out of render.',
+          'Component props MUST be typed with TypeScript interfaces; no implicit any.',
+          'Reusable UI primitives MUST live in a shared design system / component library.'
+        ]
+      ),
+      section(
+        'state-management',
+        'State Management Strategy',
+        'Defines how application state flows and is synchronized.',
+        [
+          'Identify state ownership: local UI state, server cache state, global app state.',
+          'Server state MUST use a data-fetching library (React Query, SWR, Apollo) — not global stores.',
+          'Global state MUST have devtools integration for debugging and time-travel.',
+          'State MUST be immutable; use spreads/immer for updates, never direct mutation.',
+          'Optimistic updates MUST be reversible on failure; rollback state on error.'
+        ]
+      ),
+      section(
+        'a11y',
+        'Accessibility & Inclusive Design',
+        'Ensures the UI works for all users, including those with disabilities.',
+        [
+          'WCAG 2.1 AA compliance is the minimum standard; target AAA where feasible.',
+          'All interactive elements MUST have accessible names (aria-label, visible text, or aria-labelledby).',
+          'Forms MUST have associated labels; validation errors MUST be announced to screen readers.',
+          'Color is never the sole indicator of state; use text/icons/patterns alongside.',
+          'Keyboard navigation MUST work for all interactive flows; focus management on route changes.',
+          'Semantic HTML first (button, nav, main, etc.); ARIA only when semantic HTML is insufficient.'
+        ]
+      ),
+      section(
+        'performance-web',
+        'Web Performance Budget',
+        'Keeps the frontend fast and responsive under real-world conditions.',
+        [
+          'Core Web Vitals targets: LCP < 2.5s, FID < 100ms, CLS < 0.1.',
+          'Bundle budget: < 250KB gzipped for initial JavaScript; code-split by route.',
+          'Images: use modern formats (WebP/AVIF), responsive srcset, lazy loading below the fold.',
+          'Fonts: use font-display: swap; subset to required characters; preload critical fonts.',
+          'No layout shifts from dynamic content; reserve space with skeleton/suspense.',
+          'Lighthouse performance score MUST be ≥ 90 before shipping to production.'
+        ]
+      ),
+      section(
+        'responsive-design',
+        'Responsive & Adaptive Design',
+        'Ensures the UI works across all screen sizes and devices.',
+        [
+          'Mobile-first CSS: base styles for mobile, media queries for larger screens.',
+          'Breakpoints MUST follow the design system; no arbitrary pixel values.',
+          'Touch targets MUST be minimum 44x44 points on mobile devices.',
+          'Layout MUST use flexible units (%, rem, vw) not fixed pixels.',
+          'Content MUST be readable without horizontal scrolling at all breakpoints.',
+          'Test on real devices; emulator-only testing is insufficient.'
+        ]
+      ),
+      section(
+        'frontend-testing',
+        'Frontend Testing Strategy',
+        'Defines the testing pyramid for UI code.',
+        [
+          'Unit tests for utility functions and pure logic (no DOM).',
+          'Component tests for rendering, interactions, and state changes (Testing Library / Vue Test Utils).',
+          'Visual regression tests for critical UI flows (Chromatic, Percy, or Playwright screenshots).',
+          'E2E tests for critical user journeys (login, checkout, form submissions).',
+          'Accessibility tests in CI (axe-core, Lighthouse CI) — a11y regressions are blocking.',
+          'Cross-browser testing: Chrome, Firefox, Safari, Edge at minimum.'
+        ]
+      )
+    ] : []),
+    ...((style === 'jamstack' || style === 'server-components' || style === 'islands-architecture') ? [
+      section(
+        'rendering-strategy',
+        'Rendering & Caching Strategy',
+        'Defines when and how pages are rendered (SSR, SSG, ISR, CSR).',
+        [
+          'Route-level rendering strategy MUST be documented for every page.',
+          'Static pages MUST be pre-rendered at build time; dynamic pages use SSR/ISR.',
+          'Cache headers MUST be explicit: public/private, max-age, stale-while-revalidate.',
+          'No stale data in authenticated routes; invalidate cache on mutation.',
+          'Edge functions for personalization; origin fallback for complex logic.'
+        ]
+      )
+    ] : [])
   ];
 }
 
@@ -320,6 +415,30 @@ function styleDirectives(style: string): string[] {
         'Consumers MUST be idempotent; replay is always safe.',
         'Event-driven boundaries wrap an otherwise layered core so domain logic stays testable.'
       ];
+    case 'jamstack':
+      return [
+        'Static-first architecture: pre-render pages at build time, hydrate on client.',
+        'API routes for dynamic data; serverless functions for backend logic.',
+        'CDN-first serving with edge caching for all static assets and pre-rendered pages.',
+        'Incremental Static Regeneration (ISR) for pages that change frequently.',
+        'No server-side rendering for static content; use SSR only for personalized/dynamic routes.'
+      ];
+    case 'server-components':
+      return [
+        'React Server Components by default; client components only for interactivity.',
+        'Server components MUST NOT use hooks, browser APIs, or event handlers.',
+        'Client components MUST be marked with "use client" at the top of the file.',
+        'Data fetching happens in server components; pass serialized data as props to client components.',
+        'Server components can directly access databases, filesystem, and internal APIs.'
+      ];
+    case 'islands-architecture':
+      return [
+        'Static HTML for all content; interactive "islands" hydrate independently.',
+        'Each island is a self-contained component with its own state and lifecycle.',
+        'Islands MUST be lazy-loaded and only include the JavaScript they need.',
+        'No full-page hydration; only interactive elements download JS.',
+        'Shared state between islands goes through URL state or a lightweight store.'
+      ];
     default:
       return [
         'Presentation → application → domain → infrastructure; dependency arrows point inward.',
@@ -333,6 +452,16 @@ function styleDirectives(style: string): string[] {
 function resolveOption<T>(value: string | undefined, fallback: T, allowed: string[]): T {
   if (value && allowed.includes(value)) return value as unknown as T;
   return fallback;
+}
+
+function isFrontendStyle(style: string): boolean {
+  return /^(server-components|jamstack|islands-architecture)$/i.test(style);
+}
+
+function hasFrontendFramework(options: BlueprintSeedInput['options']): boolean {
+  const fw = options?.framework?.toLowerCase();
+  if (!fw) return false;
+  return /react|vue|angular|svelte|next|nuxt|remix|solid|preact|lit|ember|alpine/i.test(fw);
 }
 
 function describeList(items: string[]): string {

@@ -98,7 +98,7 @@ export function getWizardPhases(): WizardPhase[] {
           id: 'architectureStyle',
           label: 'Architecture Style',
           type: 'select',
-          options: ['Auto (AI recommends)', 'Clean Architecture', 'Modular Monolith', 'Microservices', 'Layered', 'Event-Driven']
+          options: ['Auto (AI recommends)', 'Clean Architecture', 'Modular Monolith', 'Microservices', 'Layered', 'Event-Driven', 'JAMstack', 'Server Components', 'Islands Architecture']
         },
         {
           id: 'securityLevel',
@@ -106,10 +106,10 @@ export function getWizardPhases(): WizardPhase[] {
           type: 'select',
           options: ['Baseline', 'Hardened', 'Regulated']
         },
-        { id: 'language', label: 'Language', type: 'text', placeholder: 'e.g. TypeScript, Python, Go' },
-        { id: 'runtime', label: 'Runtime', type: 'text', placeholder: 'e.g. Node.js, Bun, Deno' },
-        { id: 'framework', label: 'Framework', type: 'text', placeholder: 'e.g. Express, Fastify, NestJS' },
-        { id: 'database', label: 'Database', type: 'text', placeholder: 'e.g. PostgreSQL, MongoDB, MySQL' },
+        { id: 'language', label: 'Language', type: 'text', placeholder: 'e.g. TypeScript, Python, Go, Dart, Kotlin' },
+        { id: 'runtime', label: 'Runtime', type: 'text', placeholder: 'e.g. Node.js, Bun, Deno, Browser, iOS, Android' },
+        { id: 'framework', label: 'Framework', type: 'text', placeholder: 'e.g. React, Next.js, Vue, NestJS, Flutter, Express' },
+        { id: 'database', label: 'Database', type: 'text', placeholder: 'e.g. PostgreSQL, MongoDB, SQLite, Firebase' },
         { id: 'blueprintText', label: 'Additional Requirements', type: 'textarea', placeholder: 'Paste any extra requirements, constraints, or a full spec...' }
       ]
     }

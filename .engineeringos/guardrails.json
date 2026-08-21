@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 3,
+  "modelVersion": 4,
   "guardrails": [
     {
       "id": "GR-001",
@@ -350,6 +350,298 @@
       ]
     },
     {
+      "id": "tpl-auth-csrf-protection",
+      "name": "Auth: CSRF protection on state-changing endpoints",
+      "rule": "State-changing API endpoints (POST, PUT, DELETE) must validate CSRF tokens.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Middleware: CSRF token validation on mutation endpoints"
+      ],
+      "reason": "Without CSRF protection, attackers can trick users into performing unwanted actions.",
+      "verification": [
+        "Verify CSRF middleware is applied to all state-changing endpoints"
+      ]
+    },
+    {
+      "id": "tpl-auth-rate-limiting-login",
+      "name": "Auth: Rate limit login attempts",
+      "rule": "Login and authentication endpoints must have rate limiting.",
+      "severity": "blocking",
+      "scope": [
+        "**/auth/**",
+        "**/login/**",
+        "**/signin/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Middleware: rate limiting on auth endpoints"
+      ],
+      "reason": "Unlimited login attempts enable brute-force attacks on user credentials.",
+      "verification": [
+        "Verify rate limiting is applied to auth endpoints"
+      ]
+    },
+    {
+      "id": "tpl-cicd-no-secrets-in-logs",
+      "name": "CI/CD: No secrets in pipeline logs",
+      "rule": "CI/CD pipelines must mask or redact secrets in output logs.",
+      "severity": "blocking",
+      "scope": [
+        ".github/**",
+        ".gitlab-ci.yml",
+        ".circleci/**",
+        "**/Jenkinsfile"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "echo\\s+.*\\$",
+        "printenv"
+      ],
+      "enforcement": [
+        "CI: use secret masking in pipeline configuration"
+      ],
+      "reason": "Unmasked secrets in CI logs are exposed to anyone with repo access.",
+      "verification": [
+        "Verify pipeline configuration masks secrets"
+      ]
+    },
+    {
+      "id": "tpl-cicd-run-tests-before-deploy",
+      "name": "CI/CD: Tests must pass before deployment",
+      "rule": "Deployment steps must depend on test pipeline success.",
+      "severity": "blocking",
+      "scope": [
+        ".github/**",
+        ".gitlab-ci.yml",
+        ".circleci/**",
+        "**/Jenkinsfile"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Pipeline: deploy jobs depend on test jobs"
+      ],
+      "reason": "Deploying without passing tests ships broken code to production.",
+      "verification": [
+        "Verify deploy jobs depend on test job success"
+      ]
+    },
+    {
+      "id": "tpl-data-no-sql-in-string",
+      "name": "Data: No string concatenation in SQL queries",
+      "rule": "SQL queries must use parameterized queries, not string concatenation.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.java",
+        "**/*.go",
+        "**/*.rb"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "query\\s*\\(\\s*[`\"'].*\\$\\{",
+        "execute\\s*\\(\\s*[`\"'].*\\+",
+        "cursor\\.execute\\(\\s*[`\"'].*%s"
+      ],
+      "enforcement": [
+        "lint rule: detect string interpolation in SQL"
+      ],
+      "reason": "String concatenation in SQL enables injection attacks that can read, modify, or delete data.",
+      "verification": [
+        "Verify all SQL queries use parameterized statements"
+      ]
+    },
+    {
+      "id": "tpl-docker-no-root",
+      "name": "Docker: Containers must not run as root",
+      "rule": "Dockerfiles must contain USER directive with non-root user.",
+      "severity": "blocking",
+      "scope": [
+        "Dockerfile",
+        "**/Dockerfile",
+        "**/*.dockerfile"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: verify Dockerfile has USER directive"
+      ],
+      "reason": "Running as root gives containers unnecessary privileges, increasing attack surface.",
+      "verification": [
+        "Verify Dockerfile contains USER directive with non-root user"
+      ]
+    },
+    {
+      "id": "tpl-docker-no-secrets-in-build",
+      "name": "Docker: No secrets in build args or ENV",
+      "rule": "Dockerfiles must not embed secrets in ARG or ENV instructions.",
+      "severity": "blocking",
+      "scope": [
+        "Dockerfile",
+        "**/Dockerfile",
+        "**/*.dockerfile"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "ARG\\s+.*KEY",
+        "ARG\\s+.*SECRET",
+        "ARG\\s+.*PASSWORD",
+        "ENV\\s+.*KEY=",
+        "ENV\\s+.*SECRET=",
+        "ENV\\s+.*PASSWORD="
+      ],
+      "enforcement": [
+        "lint rule: hadolint DL3003"
+      ],
+      "reason": "Secrets in Dockerfiles are baked into image layers and visible in image history.",
+      "verification": [
+        "Verify no secrets in Dockerfile ARG/ENV instructions"
+      ]
+    },
+    {
+      "id": "tpl-env-no-commit-secrets",
+      "name": "Environment: Never commit .env files",
+      "rule": ".env files must be in .gitignore and never committed to version control.",
+      "severity": "blocking",
+      "scope": [
+        ".env",
+        ".env.*",
+        "**/.env",
+        "**/.env.*"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "API_KEY",
+        "SECRET",
+        "PASSWORD",
+        "TOKEN",
+        "PRIVATE_KEY"
+      ],
+      "enforcement": [
+        "CI: detect .env files in git history"
+      ],
+      "reason": "Committed .env files expose credentials to anyone with repo access.",
+      "verification": [
+        "Verify .env is in .gitignore and not in git history"
+      ]
+    },
+    {
+      "id": "tpl-env-no-default-secrets",
+      "name": "Environment: No default/placeholder secrets",
+      "rule": "Configuration files must not contain default, placeholder, or example secret values.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.json",
+        "**/*.yaml",
+        "**/*.yml"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "changeme",
+        "replace_me",
+        "your[_-]?api[_-]?key",
+        "TODO.*secret",
+        "placeholder.*key"
+      ],
+      "enforcement": [
+        "CI: detect placeholder secrets in config"
+      ],
+      "reason": "Default secrets are often deployed to production, creating security vulnerabilities.",
+      "verification": [
+        "Verify no placeholder secrets in configuration"
+      ]
+    },
+    {
+      "id": "tpl-error-no-sensitive-leak",
+      "name": "Errors: Never expose internal errors to clients",
+      "rule": "API error responses must not contain stack traces, database errors, or internal paths.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "stack\\s*:",
+        "Stack Trace",
+        "at\\s+\\w+\\.\\w+\\(",
+        "internal.*error",
+        "database.*error"
+      ],
+      "enforcement": [
+        "CI: scan error responses for sensitive data"
+      ],
+      "reason": "Internal error details reveal system architecture and potential attack vectors.",
+      "verification": [
+        "Verify error responses contain only safe messages"
+      ]
+    },
+    {
+      "id": "tpl-iac-no-public-ingress",
+      "name": "Infrastructure: No unrestricted public ingress",
+      "rule": "Cloud resources must not expose ports 0.0.0.0/0 without security group restrictions.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.tf",
+        "**/*.tfvars",
+        "**/cloudformation/**",
+        "**/pulumi/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "0\\.0\\.0\\.0/0",
+        "0\\.0\\.0\\.0\\\\/0"
+      ],
+      "enforcement": [
+        "IaC scan: detect unrestricted CIDR rules"
+      ],
+      "reason": "Unrestricted public ingress exposes all services to the internet.",
+      "verification": [
+        "Verify security groups restrict ingress to known CIDRs"
+      ]
+    },
+    {
+      "id": "tpl-mobile-no-sensitive-data-logs",
+      "name": "Mobile: No sensitive data in device logs",
+      "rule": "Logs must not contain PII, tokens, or credentials in mobile release builds.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.dart",
+        "**/*.swift",
+        "**/*.kt"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "console\\.log\\(",
+        "Log\\.d\\(",
+        "print\\("
+      ],
+      "enforcement": [
+        "CI: strip console.log from release builds"
+      ],
+      "reason": "Mobile device logs can be accessed by other apps or extracted from devices.",
+      "verification": [
+        "Verify no sensitive data in release logs"
+      ]
+    },
+    {
       "id": "tpl-perf-external-timeout",
       "name": "Performance: External call timeout required",
       "rule": "All external HTTP calls, database queries, and message queue operations must have explicit timeouts.",
@@ -479,6 +771,29 @@
       ]
     },
     {
+      "id": "tpl-state-no-global-mutation",
+      "name": "State: No direct global state mutation",
+      "rule": "Global state (Redux, Zustand, Pinia, etc.) must be modified through actions/mutations, not direct assignment.",
+      "severity": "blocking",
+      "scope": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.vue"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "store\\.state\\.[a-z]+\\s*=",
+        "state\\.[a-z]+\\s*=\\s*(?!undefined)"
+      ],
+      "enforcement": [
+        "lint rule: no-direct-state-mutation"
+      ],
+      "reason": "Direct state mutation bypasses change tracking, devtools, and time-travel debugging.",
+      "verification": [
+        "Verify state changes go through actions/mutations"
+      ]
+    },
+    {
       "id": "tpl-tdd-test-before-code",
       "name": "TDD: Tests must exist before implementation",
       "rule": "Every implementation file must have a corresponding test file. No production code without a test.",
@@ -496,6 +811,251 @@
       "reason": "Test-driven development requires tests to exist alongside or before production code. Code without tests is unverifiable.",
       "verification": [
         "Verify each .ts/.js source file has a corresponding .test.ts/.test.js file"
+      ]
+    },
+    {
+      "id": "tpl-a11y-form-labels",
+      "name": "Accessibility: Form inputs must have labels",
+      "rule": "All <input>, <select>, and <textarea> elements must be associated with a <label>.",
+      "severity": "warning",
+      "scope": [
+        "**/*.tsx",
+        "**/*.jsx",
+        "**/*.vue",
+        "**/*.svelte"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "<input(?!.*aria-label)(?!.*id=)"
+      ],
+      "enforcement": [
+        "lint rule: jsx-a11y/label-has-associated-control"
+      ],
+      "reason": "Unlabeled inputs are inaccessible to screen reader users.",
+      "verification": [
+        "Verify all form inputs have associated labels"
+      ]
+    },
+    {
+      "id": "tpl-a11y-aria-labels",
+      "name": "Accessibility: Interactive elements must have accessible names",
+      "rule": "Buttons, links, and interactive elements must have aria-label, aria-labelledby, or visible text.",
+      "severity": "warning",
+      "scope": [
+        "**/*.tsx",
+        "**/*.jsx",
+        "**/*.vue",
+        "**/*.svelte"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "<button\\s*>\\s*</button>",
+        "<a\\s+href[^>]*>\\s*</a>"
+      ],
+      "enforcement": [
+        "lint rule: jsx-a11y/role-supports-aria-props"
+      ],
+      "reason": "Screen readers cannot identify elements without accessible names, excluding users with disabilities.",
+      "verification": [
+        "Verify all interactive elements have accessible names"
+      ]
+    },
+    {
+      "id": "tpl-a11y-color-contrast",
+      "name": "Accessibility: Sufficient color contrast",
+      "rule": "Text must have sufficient color contrast ratio (4.5:1 for normal text, 3:1 for large text).",
+      "severity": "warning",
+      "scope": [
+        "**/*.css",
+        "**/*.scss",
+        "**/*.module.css"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "color:\\s*#(fff|ffffff|000|000000)\\s*;"
+      ],
+      "enforcement": [
+        "CSS lint rule for color contrast"
+      ],
+      "reason": "Low contrast text is unreadable for users with visual impairments.",
+      "verification": [
+        "Verify all text meets WCAG 2.1 AA contrast requirements"
+      ]
+    },
+    {
+      "id": "tpl-api-contract-versioning",
+      "name": "API: Endpoints must be versioned",
+      "rule": "API endpoints must include version prefix (e.g., /api/v1/).",
+      "severity": "warning",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.go"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "/api/(?!v\\d)[a-z]"
+      ],
+      "enforcement": [
+        "CI: verify API routes have version prefix"
+      ],
+      "reason": "Unversioned APIs break clients when the API changes, causing production incidents.",
+      "verification": [
+        "Verify all API routes have version prefix"
+      ]
+    },
+    {
+      "id": "tpl-cicd-require-pr-approval",
+      "name": "CI/CD: Require PR approval before merge",
+      "rule": "Main branch must require at least one PR approval before merge.",
+      "severity": "warning",
+      "scope": [
+        ".github/**",
+        ".gitlab-ci.yml"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "Repository settings: require PR reviews"
+      ],
+      "reason": "Merging without review bypasses code quality checks and introduces unvetted changes.",
+      "verification": [
+        "Verify branch protection rules require PR approval"
+      ]
+    },
+    {
+      "id": "tpl-data-no-select-star",
+      "name": "Data: Avoid SELECT * in queries",
+      "rule": "SQL queries must specify columns explicitly, not use SELECT *.",
+      "severity": "warning",
+      "scope": [
+        "**/*.ts",
+        "**/*.js",
+        "**/*.py",
+        "**/*.java",
+        "**/*.go",
+        "**/*.rb"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "SELECT\\s+\\*\\s+FROM"
+      ],
+      "enforcement": [
+        "Code review: specify columns explicitly"
+      ],
+      "reason": "SELECT * retrieves unnecessary data, wastes bandwidth, and breaks when schema changes.",
+      "verification": [
+        "Verify queries specify columns explicitly"
+      ]
+    },
+    {
+      "id": "tpl-data-migration-versioned",
+      "name": "Data: Migrations must be versioned and reversible",
+      "rule": "Database migrations must have version numbers and up/down functions.",
+      "severity": "warning",
+      "scope": [
+        "**/migrations/**",
+        "**/migrate/**",
+        "**/alembic/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "CI: verify migration files are versioned"
+      ],
+      "reason": "Unversioned migrations cause conflicts in team environments and cannot be rolled back.",
+      "verification": [
+        "Verify migrations have version numbers and rollback support"
+      ]
+    },
+    {
+      "id": "tpl-docker-no-latest",
+      "name": "Docker: Do not use :latest tag",
+      "rule": "FROM directives must pin specific image versions, not :latest.",
+      "severity": "warning",
+      "scope": [
+        "Dockerfile",
+        "**/Dockerfile",
+        "**/*.dockerfile"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "FROM\\s+\\S+:latest"
+      ],
+      "enforcement": [
+        "Lint rule: hadolint DL3007"
+      ],
+      "reason": ":latest tag causes non-reproducible builds and unexpected behavior on rebuilds.",
+      "verification": [
+        "Verify all FROM directives use pinned versions"
+      ]
+    },
+    {
+      "id": "tpl-iac-enable-logging",
+      "name": "Infrastructure: Enable logging and monitoring",
+      "rule": "Cloud resources must have logging enabled (CloudWatch, Stackdriver, etc.).",
+      "severity": "warning",
+      "scope": [
+        "**/*.tf",
+        "**/cloudformation/**"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [],
+      "enforcement": [
+        "IaC scan: verify logging configuration"
+      ],
+      "reason": "Without logging, security incidents and performance issues are invisible.",
+      "verification": [
+        "Verify all cloud resources have logging enabled"
+      ]
+    },
+    {
+      "id": "tpl-mobile-no-hardcoded-urls",
+      "name": "Mobile: No hardcoded API URLs",
+      "rule": "API base URLs must come from environment configuration, not hardcoded strings.",
+      "severity": "warning",
+      "scope": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.dart",
+        "**/*.swift",
+        "**/*.kt"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "https?://[a-z]+\\.[a-z]+\\.[a-z]+/api"
+      ],
+      "enforcement": [
+        "Code review: use environment config for API URLs"
+      ],
+      "reason": "Hardcoded URLs break when switching between dev/staging/production environments.",
+      "verification": [
+        "Verify API URLs come from environment config"
+      ]
+    },
+    {
+      "id": "tpl-perf-no-heavy-libs-bundle",
+      "name": "Performance: Avoid heavy libraries in client bundle",
+      "rule": "Heavy libraries (moment.js, lodash full, pdf-lib) should use tree-shakable alternatives or dynamic imports.",
+      "severity": "warning",
+      "scope": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx"
+      ],
+      "allowedPatterns": [],
+      "forbiddenPatterns": [
+        "from\\s+['\"]moment['\"]",
+        "from\\s+['\"]lodash['\"]"
+      ],
+      "enforcement": [
+        "Code review: prefer date-fns, lodash-es, or dayjs"
+      ],
+      "reason": "Large libraries inflate bundle size and slow initial page load.",
+      "verification": [
+        "Verify bundle uses tree-shakable alternatives"
       ]
     },
     {
@@ -695,48 +1255,8 @@
       "verification": [
         "Verify each test block contains at least one expect(), assert(), or should call"
       ]
-    },
-    {
-      "id": "tpl-perf-batch-operations",
-      "name": "Performance: Batch database operations",
-      "rule": "Bulk inserts and updates must use batch operations (createMany, upsertMany) instead of individual inserts in loops.",
-      "severity": "advisory",
-      "scope": [
-        "**/*.service.ts",
-        "**/*.repository.ts",
-        "**/seeds/**"
-      ],
-      "allowedPatterns": [],
-      "forbiddenPatterns": [],
-      "enforcement": [
-        "AST scan: detect individual insert/update calls inside loops"
-      ],
-      "reason": "Individual inserts in loops execute N separate SQL statements instead of a single batched statement.",
-      "verification": [
-        "Verify bulk data operations use createMany or equivalent batch APIs"
-      ]
-    },
-    {
-      "id": "tpl-tdd-red-green-refactor",
-      "name": "TDD: RED-GREEN-REFACTOR commit discipline",
-      "rule": "Implementation commits should follow RED-GREEN-REFACTOR: first commit adds failing test, second adds minimal passing code, third refactors.",
-      "severity": "advisory",
-      "scope": [
-        "src/**",
-        "lib/**",
-        "app/**"
-      ],
-      "allowedPatterns": [],
-      "forbiddenPatterns": [],
-      "enforcement": [
-        "Code review: verify test-first in commit history"
-      ],
-      "reason": "RED-GREEN-REFACTOR ensures tests drive design, not afterthoughts. Each commit is either red, green, or refactor — never all three.",
-      "verification": [
-        "Verify commit messages or PRs show test-first progression"
-      ]
     }
   ],
-  "updatedAt": "2026-08-19T02:06:52.538Z",
-  "basedOnCommit": "97339eefa305cecfedad75c203b7b7de85e08e9d"
+  "updatedAt": "2026-08-21T13:11:37.938Z",
+  "basedOnCommit": "18fb1abb7fde03339e3de4eac9e69a77f3f2543c"
 }

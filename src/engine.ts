@@ -279,7 +279,10 @@ export class EngineeringOSEngine {
       domains: input.criticalCapabilities.map(c => c.toLowerCase()),
       compliance: input.compliance ?? [],
       existingGuardrails: guardrails.guardrails,
-      maxGuardrails: 40
+      maxGuardrails: 40,
+      languages: input.language ? [input.language.toLowerCase()] : [],
+      runtime: input.runtime ? [input.runtime.toLowerCase()] : [],
+      architectureStyle: input.architectureStyle
     });
     guardrails.guardrails.push(...contextualGuardrails);
     notes.push(`Added ${contextualGuardrails.length} contextual guardrails from templates.`);
@@ -1212,6 +1215,99 @@ function createInitialMentalModel(input: OnboardingInput): MentalModel {
     scope: ['src', 'lib', 'app'],
     enforcement: ['CI: enforce coverage threshold in test runner config'],
     verification: ['coverage report']
+  });
+
+  // Frontend invariants (auto-detected based on framework/language).
+  const isFrontend = input.framework && /^(react|vue|angular|svelte|next|nuxt|remix|sveltekit|react-native|flutter)$/i.test(input.framework);
+  const isMobile = input.framework && /^(react-native|flutter|ionic)$/i.test(input.framework);
+  const isFullstack = input.framework && /^(next|nuxt|remix|sveltekit)$/i.test(input.framework);
+
+  if (isFrontend || isFullstack) {
+    model = addInvariant(model, {
+      id: 'INV-FE-001',
+      statement: 'All interactive UI components have accessible names (ARIA labels, visible text).',
+      severity: 'warning',
+      scope: ['ui', 'components'],
+      enforcement: ['a11y lint rule', 'screen reader testing'],
+      verification: ['accessibility audit', 'WCAG 2.1 AA compliance check']
+    });
+    model = addInvariant(model, {
+      id: 'INV-FE-002',
+      statement: 'Form inputs have associated labels and validation feedback.',
+      severity: 'warning',
+      scope: ['ui', 'forms'],
+      enforcement: ['a11y lint rule for form labels'],
+      verification: ['form accessibility test']
+    });
+    model = addInvariant(model, {
+      id: 'INV-FE-003',
+      statement: 'UI state is managed through a single source of truth (store/context), not scattered local state.',
+      severity: 'advisory',
+      scope: ['ui', 'state'],
+      enforcement: ['Code review: state management pattern'],
+      verification: ['state architecture review']
+    });
+    model = addInvariant(model, {
+      id: 'INV-FE-004',
+      statement: 'Client bundle does not exceed performance budget (250KB gzipped).',
+      severity: 'warning',
+      scope: ['ui', 'bundle'],
+      enforcement: ['CI: bundle size check'],
+      verification: ['Lighthouse performance audit']
+    });
+    model = addInvariant(model, {
+      id: 'INV-FE-005',
+      statement: 'No user-controlled HTML is rendered without sanitization (XSS prevention).',
+      severity: 'blocking',
+      scope: ['ui', 'security'],
+      enforcement: ['sanitizer on dangerouslySetInnerHTML/v-html/@html'],
+      verification: ['XSS vulnerability scan']
+    });
+  }
+
+  if (isMobile) {
+    model = addInvariant(model, {
+      id: 'INV-MOB-001',
+      statement: 'App handles offline mode gracefully with cached data or error states.',
+      severity: 'warning',
+      scope: ['mobile', 'network'],
+      enforcement: ['network connectivity check middleware'],
+      verification: ['offline mode testing']
+    });
+    model = addInvariant(model, {
+      id: 'INV-MOB-002',
+      statement: 'App responds to lifecycle events (background/foreground) correctly.',
+      severity: 'blocking',
+      scope: ['mobile', 'lifecycle'],
+      enforcement: ['lifecycle event handlers'],
+      verification: ['lifecycle testing on real devices']
+    });
+    model = addInvariant(model, {
+      id: 'INV-MOB-003',
+      statement: 'Touch targets are minimum 44x44 points for all interactive elements.',
+      severity: 'warning',
+      scope: ['mobile', 'ui'],
+      enforcement: ['Design system minimum touch target'],
+      verification: ['accessibility audit on mobile']
+    });
+  }
+
+  // DevOps invariants (auto-detected based on project structure).
+  model = addInvariant(model, {
+    id: 'INV-OPS-001',
+    statement: 'All services have health check endpoints.',
+    severity: 'warning',
+    scope: ['ops', 'monitoring'],
+    enforcement: ['CI: verify health endpoint exists'],
+    verification: ['health endpoint test']
+  });
+  model = addInvariant(model, {
+    id: 'INV-OPS-002',
+    statement: 'Application version is exposed via /health or /version endpoint.',
+    severity: 'advisory',
+    scope: ['ops', 'versioning'],
+    enforcement: ['CI: verify version endpoint'],
+    verification: ['version endpoint test']
   });
 
   // Domain-specific invariants from wizard input.

@@ -8,6 +8,9 @@ export interface GenerationInput {
   compliance: string[];
   existingGuardrails: Guardrail[];
   maxGuardrails?: number;
+  languages?: string[];
+  runtime?: string[];
+  architectureStyle?: string;
 }
 
 const SEVERITY_ORDER: Record<Guardrail['severity'], number> = {
@@ -20,6 +23,20 @@ function templateMatchesFrameworks(template: GuardrailTemplate, frameworks: stri
   if (!template.applicableFrameworks || template.applicableFrameworks.length === 0) return true;
   return frameworks.some(f =>
     template.applicableFrameworks!.some(t => t.toLowerCase() === f.toLowerCase()),
+  );
+}
+
+function templateMatchesLanguages(template: GuardrailTemplate, languages: string[]): boolean {
+  if (!template.applicableLanguages || template.applicableLanguages.length === 0) return true;
+  return languages.some(l =>
+    template.applicableLanguages!.some(t => t.toLowerCase() === l.toLowerCase()),
+  );
+}
+
+function templateMatchesRuntime(template: GuardrailTemplate, runtime: string[]): boolean {
+  if (!template.applicableRuntime || template.applicableRuntime.length === 0) return true;
+  return runtime.some(r =>
+    template.applicableRuntime!.some(t => t.toLowerCase() === r.toLowerCase()),
   );
 }
 
@@ -98,6 +115,8 @@ export function generateContextualGuardrails(input: GenerationInput): Guardrail[
     if (!templateMatchesDatabases(template, input.databases)) return false;
     if (!templateMatchesDomains(template, input.domains)) return false;
     if (!templateMatchesCompliance(template, input.compliance)) return false;
+    if (input.languages && input.languages.length > 0 && !templateMatchesLanguages(template, input.languages)) return false;
+    if (input.runtime && input.runtime.length > 0 && !templateMatchesRuntime(template, input.runtime)) return false;
     return true;
   });
 
