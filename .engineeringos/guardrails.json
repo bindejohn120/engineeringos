@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 7,
+  "modelVersion": 6,
   "guardrails": [
     {
       "id": "GR-001",
@@ -1251,6 +1251,6 @@
       ]
     }
   ],
-  "updatedAt": "2026-08-21T14:42:24.535Z",
-  "basedOnCommit": "808c18d9cbbc91a396996a86fa75784f660b9d2e"
+  "updatedAt": "2026-08-22T20:44:39.250Z",
+  "basedOnCommit": "c0a692533895332686cf4125cd61dda5dec13448"
 }

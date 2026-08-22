@@ -93,6 +93,7 @@ export interface OnboardingResult {
   threats?: number;
   notes?: string[];
   quality?: ArtifactQualityScore;
+  validationErrors?: ValidationError[];
 }
 
 export class EngineeringOSEngine {
@@ -273,30 +274,32 @@ export class EngineeringOSEngine {
       notes.push('AI disabled; using deterministic output only.');
     }
 
-    const contextualGuardrails = generateContextualGuardrails({
-      frameworks: input.framework ? [input.framework.toLowerCase()] : [],
-      databases: input.database ? [input.database.toLowerCase()] : [],
-      domains: input.criticalCapabilities.map(c => c.toLowerCase()),
-      compliance: input.compliance ?? [],
-      existingGuardrails: guardrails.guardrails,
-      maxGuardrails: 40,
-      languages: input.language ? [input.language.toLowerCase()] : [],
-      runtime: input.runtime ? [input.runtime.toLowerCase()] : [],
-      architectureStyle: input.architectureStyle
-    });
-    guardrails.guardrails.push(...contextualGuardrails);
-    notes.push(`Added ${contextualGuardrails.length} contextual guardrails from templates.`);
+    // Cross-reference blueprint → map: populate services and data stores.
+    const crossReferencedMap = crossReferenceBlueprintToMap(map, blueprint);
 
-    const quality = evaluateOverallQuality(map, mentalModel, guardrails, blueprint);
+    // Stack-conditional guardrails: use blueprint.techStack for precise matching.
+    const prevGuardrailCount = guardrails.guardrails.length;
+    const stackGuardrails = regenerateGuardrailsFromBlueprint(guardrails, blueprint, input);
+    guardrails.guardrails = stackGuardrails.guardrails;
+    const addedCount = guardrails.guardrails.length - prevGuardrailCount;
+    notes.push(`Regenerated ${addedCount} guardrails using blueprint tech stack.`);
+
+    // Post-generation validation.
+    const validationErrors = validateArtifacts(crossReferencedMap, mentalModel, guardrails, blueprint);
+    if (validationErrors.length > 0) {
+      notes.push(`Validation found ${validationErrors.length} issue(s): ${validationErrors.map(e => e.message).join('; ')}`);
+    }
+
+    const quality = evaluateOverallQuality(crossReferencedMap, mentalModel, guardrails, blueprint);
 
     const commit = await getCurrentCommit(this.workspacePath);
     await this.repository.saveConfig(config);
-    await this.repository.saveMap(map, commit);
+    await this.repository.saveMap(crossReferencedMap, commit);
     await this.repository.saveMentalModel(mentalModel, commit);
     await this.repository.saveGuardrails(guardrails, commit);
     await this.repository.saveBlueprint(blueprint, commit);
-    await this.regenerateMarkdown(map, mentalModel, guardrails, blueprint);
-    return { map, mentalModel, guardrails, blueprint, blueprintNote, aiEnhanced, domainEntities, threats: threatCount, notes, quality };
+    await this.regenerateMarkdown(crossReferencedMap, mentalModel, guardrails, blueprint);
+    return { map: crossReferencedMap, mentalModel, guardrails, blueprint, blueprintNote, aiEnhanced, domainEntities, threats: threatCount, notes, quality, validationErrors };
   }
 
   async generateBlueprint(options?: BlueprintOptions): Promise<Blueprint> {
@@ -649,6 +652,279 @@ function blueprintSeedFromState(state: AgentState, options?: BlueprintOptions): 
 
 function blueprintWithNote(blueprint: Blueprint, note: string): Blueprint {
   return { ...blueprint, summary: `${blueprint.summary}\n\n> ${note}` };
+}
+
+// ─── Cross-Reference: Blueprint → Map ────────────────────────────────────────
+
+function crossReferenceBlueprintToMap(map: Map, blueprint: Blueprint): Map {
+  const result = { ...map };
+
+  // Extract data stores from blueprint's data section and tech stack.
+  const dataSection = blueprint.sections.find(s => s.id === 'data');
+  const techDb = blueprint.techStack?.database;
+
+  // Populate services[] from blueprint sections and capabilities.
+  const capSource = result.components.filter(c => c.id.startsWith('app-'));
+  for (const comp of capSource) {
+    const svcId = `svc-${comp.id.replace('app-', '')}`;
+    if (!result.services.some(s => s.id === svcId)) {
+      result.services = [...result.services, {
+        id: svcId,
+        name: comp.name.replace(' Service', ''),
+        purpose: comp.purpose,
+        responsibilities: comp.responsibilities,
+        dependencies: comp.dependencies,
+        dependents: comp.dependents,
+        interfaces: comp.interfaces,
+        failureModes: comp.failureModes,
+        sourceLocations: comp.sourceLocations
+      }];
+    }
+  }
+
+  // Populate dataStores[] from components and blueprint data section.
+  const storeComponents = result.components.filter(c => c.id.startsWith('store-') || c.id.startsWith('data-'));
+  for (const comp of storeComponents) {
+    if (!result.dataStores.some(d => d.id === comp.id)) {
+      const directive = dataSection?.directives?.find(d =>
+        d.toLowerCase().includes(comp.name.toLowerCase().split(' ')[0].toLowerCase()) ||
+        d.toLowerCase().includes('database') ||
+        d.toLowerCase().includes('store')
+      );
+      const tables = directive
+        ? [`${comp.id.replace('store-', '').replace('data-', '')}_records`]
+        : [];
+      result.dataStores = [...result.dataStores, {
+        id: comp.id,
+        name: comp.name,
+        purpose: comp.purpose,
+        tables,
+        dependencies: comp.dependencies,
+        dependents: comp.dependents,
+        interfaces: comp.interfaces,
+        failureModes: comp.failureModes,
+        sourceLocations: comp.sourceLocations
+      }];
+    }
+  }
+
+  // Ensure tech stack database is reflected in data stores if none exist yet.
+  if (techDb && result.dataStores.length === 0) {
+    result.dataStores = [{
+      id: 'data-primary',
+      name: `${techDb.charAt(0).toUpperCase() + techDb.slice(1)} Primary Store`,
+      purpose: `Primary ${techDb} data store for ${blueprint.projectName}.`,
+      tables: [],
+      dependencies: [],
+      dependents: [],
+      interfaces: [`${techDb} connection`],
+      failureModes: ['Connection exhaustion', 'Storage outage'],
+      sourceLocations: []
+    }];
+  }
+
+  // Add external systems from blueprint integration section.
+  const integrationSection = blueprint.sections.find(s => s.id === 'integration');
+  if (integrationSection) {
+    const externalDirs = integrationSection.directives.filter(d =>
+      /external|third.party|webhook|provider|api gateway/i.test(d)
+    );
+    for (let i = 0; i < externalDirs.length && i < 3; i++) {
+      const extId = `ext-${i + 1}`;
+      if (!result.externalSystems.some(e => e.id === extId)) {
+        result.externalSystems = [...result.externalSystems, {
+          id: extId,
+          name: `External System ${i + 1}`,
+          purpose: externalDirs[i],
+          interactions: [],
+          dependencies: [],
+          dependents: [],
+          interfaces: [],
+          failureModes: ['Connectivity failure', 'Rate limiting'],
+          sourceLocations: []
+        }];
+      }
+    }
+  }
+
+  return result;
+}
+
+// ─── Stack-Conditional Guardrails ────────────────────────────────────────────
+
+function regenerateGuardrailsFromBlueprint(
+  guardrails: Guardrails,
+  blueprint: Blueprint,
+  input: OnboardingInput,
+): Guardrails {
+  const ts = blueprint.techStack;
+  const languages = ts?.language ? [ts.language.toLowerCase()] : [];
+  const runtime = ts?.runtime ? [ts.runtime.toLowerCase()] : [];
+  const frameworks = ts?.framework ? [ts.framework.toLowerCase()] : [];
+  const databases = ts?.database ? [ts.database.toLowerCase()] : [];
+
+  // Merge blueprint-derived values with input values (blueprint takes priority).
+  const mergedLanguages = [...new Set([...languages, ...(input.language ? [input.language.toLowerCase()] : [])])];
+  const mergedRuntime = [...new Set([...runtime, ...(input.runtime ? [input.runtime.toLowerCase()] : [])])];
+  const mergedFrameworks = [...new Set([...frameworks, ...(input.framework ? [input.framework.toLowerCase()] : [])])];
+  const mergedDatabases = [...new Set([...databases, ...(input.database ? [input.database.toLowerCase()] : [])])];
+
+  const contextual = generateContextualGuardrails({
+    frameworks: mergedFrameworks,
+    databases: mergedDatabases,
+    domains: input.criticalCapabilities.map(c => c.toLowerCase()),
+    compliance: input.compliance ?? [],
+    existingGuardrails: guardrails.guardrails,
+    maxGuardrails: 40,
+    languages: mergedLanguages,
+    runtime: mergedRuntime,
+    architectureStyle: blueprint.architectureStyle
+  });
+
+  return {
+    ...guardrails,
+    guardrails: [...guardrails.guardrails, ...contextual]
+  };
+}
+
+// ─── Post-Generation Validation ──────────────────────────────────────────────
+
+export interface ValidationError {
+  type: 'duplicate_id' | 'contradiction' | 'empty_section' | 'orphan_reference';
+  severity: 'block' | 'review' | 'info';
+  message: string;
+  details?: string;
+}
+
+export function validateArtifacts(
+  map: Map,
+  mentalModel: MentalModel,
+  guardrails: Guardrails,
+  blueprint: Blueprint,
+): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  // 1. Duplicate ID detection across all artifacts.
+  const allIds = new Map<string, string[]>();
+
+  for (const c of map.components) {
+    const key = c.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `component:${c.name}`]);
+  }
+  for (const s of map.services) {
+    const key = s.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `service:${s.name}`]);
+  }
+  for (const d of map.dataStores) {
+    const key = d.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `dataStore:${d.name}`]);
+  }
+  for (const e of map.externalSystems) {
+    const key = e.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `externalSystem:${e.name}`]);
+  }
+  for (const inv of mentalModel.invariants) {
+    const key = inv.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `invariant:${inv.statement.slice(0, 40)}`]);
+  }
+  for (const g of guardrails.guardrails) {
+    const key = g.id;
+    allIds.set(key, [...(allIds.get(key) ?? []), `guardrail:${g.name}`]);
+  }
+
+  for (const [id, locations] of allIds) {
+    if (locations.length > 1) {
+      errors.push({
+        type: 'duplicate_id',
+        severity: 'review',
+        message: `Duplicate ID "${id}" found across: ${locations.join(', ')}`,
+        details: `Consider renaming one to avoid conflicts during verification.`
+      });
+    }
+  }
+
+  // 2. Contradiction detection between documents.
+  // Check if guardrails reference components that don't exist in map.
+  const componentIds = new Set(map.components.map(c => c.id));
+  for (const g of guardrails.guardrails) {
+    const referencedIds = g.scope.flatMap(s => {
+      const match = s.match(/component:(\w+)/);
+      return match ? [match[1]] : [];
+    });
+    for (const refId of referencedIds) {
+      if (!componentIds.has(refId)) {
+        errors.push({
+          type: 'orphan_reference',
+          severity: 'review',
+          message: `Guardrail "${g.name}" references non-existent component "${refId}"`,
+        });
+      }
+    }
+  }
+
+  // Check if blueprint architecture style contradicts map patterns.
+  const hasCircularDeps = map.relationships.some(r =>
+    map.relationships.some(r2 => r2.from === r.to && r2.to === r.from)
+  );
+  if (hasCircularDeps && /clean|layered|modular/i.test(blueprint.architectureStyle)) {
+    errors.push({
+      type: 'contradiction',
+      severity: 'review',
+      message: `Architecture style "${blueprint.architectureStyle}" contradicts circular dependencies found in the engineering map.`,
+      details: 'Clean/layered architectures should not have circular dependency relationships.'
+    });
+  }
+
+  // Check if blueprint security level contradicts guardrail severity.
+  if (blueprint.securityLevel === 'regulated') {
+    const advisoryOnly = guardrails.guardrails.filter(g =>
+      g.severity === 'advisory' && /security|auth|secret|token/i.test(g.name)
+    );
+    if (advisoryOnly.length > 0) {
+      errors.push({
+        type: 'contradiction',
+        severity: 'info',
+        message: `Blueprint specifies "regulated" security but ${advisoryOnly.length} security guardrail(s) are advisory-only.`,
+        details: 'Consider upgrading these to warning or blocking for regulated environments.'
+      });
+    }
+  }
+
+  // 3. Empty section detection — sections with no directives when siblings have data.
+  const sectionsWithData = blueprint.sections.filter(s => s.directives && s.directives.length > 0);
+  const emptySections = blueprint.sections.filter(s => !s.directives || s.directives.length === 0);
+
+  if (sectionsWithData.length > 0 && emptySections.length > 0) {
+    for (const empty of emptySections) {
+      errors.push({
+        type: 'empty_section',
+        severity: 'info',
+        message: `Blueprint section "${empty.title}" is empty while other sections have directives.`,
+        details: 'Consider adding directives or removing this section.'
+      });
+    }
+  }
+
+  // Check for empty map arrays when other related arrays have data.
+  if (map.components.length > 0 && map.services.length === 0) {
+    errors.push({
+      type: 'empty_section',
+      severity: 'info',
+      message: 'Map has components but no services defined.',
+      details: 'Services represent runtime deployable units extracted from components.'
+    });
+  }
+
+  if (map.components.length > 0 && map.relationships.length === 0) {
+    errors.push({
+      type: 'empty_section',
+      severity: 'info',
+      message: 'Map has components but no relationships defined.',
+      details: 'Relationships describe how components interact and depend on each other.'
+    });
+  }
+
+  return errors;
 }
 
 function createInitialMap(input: OnboardingInput): Map {

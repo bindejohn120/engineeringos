@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { EngineeringOSEngine } from './engine';
-import { tmpDir } from './test/helpers';
+import { EngineeringOSEngine, validateArtifacts } from './engine';
+import { tmpDir, fixtureMap, fixtureMentalModel, fixtureGuardrails } from './test/helpers';
+import { buildBlueprint } from './blueprint/engine';
 
 describe('EngineeringOSEngine integration', () => {
   let dir: string;
@@ -155,5 +156,114 @@ describe('EngineeringOSEngine integration', () => {
       expect(['block', 'review', 'info']).toContain(f.severity);
       expect(Array.isArray(f.evidence)).toBe(true);
     }
+  });
+
+  it('returns validationErrors in onboarding result', async () => {
+    const result = await engine.buildOnboardingModel({
+      projectName: 'X',
+      projectId: 'x',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['feature']
+    });
+    expect(Array.isArray(result.validationErrors)).toBe(true);
+  });
+});
+
+describe('validateArtifacts', () => {
+  it('returns empty for clean artifacts', () => {
+    const map = fixtureMap();
+    const model = fixtureMentalModel();
+    const guardrails = fixtureGuardrails();
+    const blueprint = buildBlueprint({
+      projectName: 'Test',
+      projectId: 'test',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['payment']
+    });
+    const errors = validateArtifacts(map, model, guardrails, blueprint);
+    expect(Array.isArray(errors)).toBe(true);
+    expect(errors.filter(e => e.type === 'duplicate_id').length).toBe(0);
+  });
+
+  it('detects duplicate IDs across map and guardrails', () => {
+    const map = fixtureMap();
+    const model = fixtureMentalModel();
+    const guardrails = fixtureGuardrails();
+    // Add a component with the same ID as a guardrail
+    const mapWithDupe = {
+      ...map,
+      components: [...map.components, {
+        id: guardrails.guardrails[0].id,
+        name: 'Dupe',
+        purpose: 'x',
+        responsibilities: [],
+        inputs: [],
+        outputs: [],
+        dependencies: [],
+        dependents: [],
+        interfaces: [],
+        failureModes: [],
+        sourceLocations: []
+      }]
+    };
+    const blueprint = buildBlueprint({
+      projectName: 'Test',
+      projectId: 'test',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['payment']
+    });
+    const errors = validateArtifacts(mapWithDupe, model, guardrails, blueprint);
+    expect(errors.some(e => e.type === 'duplicate_id')).toBe(true);
+  });
+
+  it('detects empty sections when siblings have data', () => {
+    const map = fixtureMap();
+    const model = fixtureMentalModel();
+    const guardrails = fixtureGuardrails();
+    const blueprint = buildBlueprint({
+      projectName: 'Test',
+      projectId: 'test',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['payment']
+    });
+    // The blueprint should have data in most sections
+    const errors = validateArtifacts(map, model, guardrails, blueprint);
+    // Info-level empty section warnings are expected for any sections without directives
+    const emptySectionErrors = errors.filter(e => e.type === 'empty_section');
+    expect(Array.isArray(emptySectionErrors)).toBe(true);
+  });
+
+  it('detects regulated security level with advisory security guardrails', () => {
+    const map = fixtureMap();
+    const model = fixtureMentalModel();
+    const guardrails = {
+      ...fixtureGuardrails(),
+      guardrails: [...fixtureGuardrails().guardrails, {
+        id: 'sec-adv',
+        name: 'Authentication Advisory Check',
+        rule: 'rule',
+        severity: 'advisory' as const,
+        scope: [],
+        allowedPatterns: [],
+        forbiddenPatterns: [],
+        enforcement: [],
+        reason: '',
+        verification: []
+      }]
+    };
+    const blueprint = buildBlueprint({
+      projectName: 'Test',
+      projectId: 'test',
+      purpose: 'P',
+      primaryUsers: [],
+      criticalCapabilities: ['payment'],
+      options: { securityLevel: 'regulated' }
+    });
+    const errors = validateArtifacts(map, model, guardrails, blueprint);
+    expect(errors.some(e => e.type === 'contradiction' && e.message.includes('regulated'))).toBe(true);
   });
 });

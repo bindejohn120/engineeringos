@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 7,
-  "updatedAt": "2026-08-21T14:42:24.454Z",
-  "basedOnCommit": "808c18d9cbbc91a396996a86fa75784f660b9d2e",
+  "modelVersion": 6,
+  "updatedAt": "2026-08-22T20:44:39.239Z",
+  "basedOnCommit": "c0a692533895332686cf4125cd61dda5dec13448",
   "systemUnderstanding": {
     "purpose": "Engineering intelligence for AI-powered software development. Gives AI coding agents a persistent engineering map, mental model, and enforceable guardrails.",
     "primaryUsers": [
@@ -611,7 +611,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-21T14:42:23.683Z",
+      "date": "2026-08-22T20:44:39.123Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -635,7 +635,7 @@
         "payment-gateway"
       ],
       "status": "proposed",
-      "date": "2026-08-21T14:42:23.683Z",
+      "date": "2026-08-22T20:44:39.123Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -665,7 +665,7 @@
         "app-verification"
       ],
       "status": "proposed",
-      "date": "2026-08-21T14:42:23.683Z",
+      "date": "2026-08-22T20:44:39.123Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -688,7 +688,7 @@
         "observability"
       ],
       "status": "proposed",
-      "date": "2026-08-21T14:42:23.683Z",
+      "date": "2026-08-22T20:44:39.123Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."
@@ -711,7 +711,7 @@
         "config"
       ],
       "status": "proposed",
-      "date": "2026-08-21T14:42:23.683Z",
+      "date": "2026-08-22T20:44:39.123Z",
       "source": "inference",
       "confidence": 0.6,
       "confidenceReason": "Generated from onboarding input; revisit and accept as code is written."

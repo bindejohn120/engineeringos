@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 13,
-  "updatedAt": "2026-08-21T14:42:25.682Z",
-  "basedOnCommit": "808c18d9cbbc91a396996a86fa75784f660b9d2e",
+  "modelVersion": 10,
+  "updatedAt": "2026-08-22T20:44:39.257Z",
+  "basedOnCommit": "c0a692533895332686cf4125cd61dda5dec13448",
   "projectId": "engineeringos-extension",
   "projectName": "EngineeringOS",
   "version": "1.0",
@@ -13,7 +13,7 @@
     "language": "TypeScript",
     "runtime": "Node.js",
     "framework": "VS Code Extension API",
-    "database": "JSON artifacts (.engineeringos/*.json)"
+    "database": "JSON artifacts"
   },
   "sections": [
     {
@@ -80,7 +80,7 @@
       "title": "Data Architecture & Integrity",
       "purpose": "Governs how data is stored, validated, migrated, and kept consistent.",
       "directives": [
-        "Every capability persists through a repository owned by its module (store: JSON artifacts (.engineeringos/*.json)).",
+        "Every capability persists through a repository owned by its module (store: JSON artifacts).",
         "Data validation MUST happen at the boundary: schemas at entry, invariants in the domain, constraints in storage.",
         "All schema changes MUST be versioned migrations; no ad-hoc DDL in application code.",
         "Transactions MUST be used for multi-step writes; no partial-state commits.",
@@ -229,5 +229,5 @@
       ]
     }
   ],
-  "generatedAt": "2026-08-21T14:42:25.371Z"
+  "generatedAt": "2026-08-22T20:44:39.124Z"
 }

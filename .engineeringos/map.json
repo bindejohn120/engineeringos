@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "modelVersion": 7,
-  "updatedAt": "2026-08-21T14:42:24.418Z",
-  "basedOnCommit": "808c18d9cbbc91a396996a86fa75784f660b9d2e",
+  "modelVersion": 6,
+  "updatedAt": "2026-08-22T20:44:39.228Z",
+  "basedOnCommit": "c0a692533895332686cf4125cd61dda5dec13448",
   "project": {
     "id": "engineeringos-extension",
     "name": "EngineeringOS",
@@ -977,7 +977,183 @@
       "sourceLocations": []
     }
   ],
-  "services": [],
+  "services": [
+    {
+      "id": "svc-map-generation",
+      "name": "Map Generation",
+      "purpose": "Implements the map generation capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate map generation workflows",
+        "Enforce business rules and invariants",
+        "Publish map generation results to callers"
+      ],
+      "dependencies": [
+        "data-map-generation",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleMapGeneration()"
+      ],
+      "failureModes": [
+        "Map Generation business rule violation",
+        "Map Generation data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-mental-model-generation",
+      "name": "Mental Model Generation",
+      "purpose": "Implements the mental model generation capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate mental model generation workflows",
+        "Enforce business rules and invariants",
+        "Publish mental model generation results to callers"
+      ],
+      "dependencies": [
+        "data-mental-model-generation",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleMentalModelGeneration()"
+      ],
+      "failureModes": [
+        "Mental Model Generation business rule violation",
+        "Mental Model Generation data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-guardrail-enforcement",
+      "name": "Guardrail Enforcement",
+      "purpose": "Implements the guardrail enforcement capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate guardrail enforcement workflows",
+        "Enforce business rules and invariants",
+        "Publish guardrail enforcement results to callers"
+      ],
+      "dependencies": [
+        "data-guardrail-enforcement",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleGuardrailEnforcement()"
+      ],
+      "failureModes": [
+        "Guardrail Enforcement business rule violation",
+        "Guardrail Enforcement data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-context-retrieval",
+      "name": "Context Retrieval",
+      "purpose": "Implements the context retrieval capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate context retrieval workflows",
+        "Enforce business rules and invariants",
+        "Publish context retrieval results to callers"
+      ],
+      "dependencies": [
+        "data-context-retrieval",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleContextRetrieval()"
+      ],
+      "failureModes": [
+        "Context Retrieval business rule violation",
+        "Context Retrieval data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-drift-detection",
+      "name": "Drift Detection",
+      "purpose": "Implements the drift detection capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate drift detection workflows",
+        "Enforce business rules and invariants",
+        "Publish drift detection results to callers"
+      ],
+      "dependencies": [
+        "data-drift-detection",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleDriftDetection()"
+      ],
+      "failureModes": [
+        "Drift Detection business rule violation",
+        "Drift Detection data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-impact-analysis",
+      "name": "Impact Analysis",
+      "purpose": "Implements the impact analysis capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate impact analysis workflows",
+        "Enforce business rules and invariants",
+        "Publish impact analysis results to callers"
+      ],
+      "dependencies": [
+        "data-impact-analysis",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleImpactAnalysis()"
+      ],
+      "failureModes": [
+        "Impact Analysis business rule violation",
+        "Impact Analysis data inconsistency"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "svc-verification",
+      "name": "Verification",
+      "purpose": "Implements the verification capability of EngineeringOS.",
+      "responsibilities": [
+        "Orchestrate verification workflows",
+        "Enforce business rules and invariants",
+        "Publish verification results to callers"
+      ],
+      "dependencies": [
+        "data-verification",
+        "observability"
+      ],
+      "dependents": [
+        "api"
+      ],
+      "interfaces": [
+        "handleVerification()"
+      ],
+      "failureModes": [
+        "Verification business rule violation",
+        "Verification data inconsistency"
+      ],
+      "sourceLocations": []
+    }
+  ],
   "dataStores": [
     {
       "id": "store-map-generation",
@@ -1102,6 +1278,160 @@
       "failureModes": [
         "Store outage",
         "Capacity exhaustion"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-map-generation",
+      "name": "Map Generation Repository",
+      "purpose": "Owns persistence for map generation entities behind the Map Generation service.",
+      "tables": [
+        "map-generation_records"
+      ],
+      "dependencies": [
+        "store-map-generation"
+      ],
+      "dependents": [
+        "app-map-generation"
+      ],
+      "interfaces": [
+        "map-generationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-mental-model-generation",
+      "name": "Mental Model Generation Repository",
+      "purpose": "Owns persistence for mental model generation entities behind the Mental Model Generation service.",
+      "tables": [
+        "mental-model-generation_records"
+      ],
+      "dependencies": [
+        "store-mental-model-generation"
+      ],
+      "dependents": [
+        "app-mental-model-generation"
+      ],
+      "interfaces": [
+        "mental-model-generationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-guardrail-enforcement",
+      "name": "Guardrail Enforcement Repository",
+      "purpose": "Owns persistence for guardrail enforcement entities behind the Guardrail Enforcement service.",
+      "tables": [
+        "guardrail-enforcement_records"
+      ],
+      "dependencies": [
+        "store-guardrail-enforcement"
+      ],
+      "dependents": [
+        "app-guardrail-enforcement"
+      ],
+      "interfaces": [
+        "guardrail-enforcementRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-context-retrieval",
+      "name": "Context Retrieval Repository",
+      "purpose": "Owns persistence for context retrieval entities behind the Context Retrieval service.",
+      "tables": [
+        "context-retrieval_records"
+      ],
+      "dependencies": [
+        "store-context-retrieval"
+      ],
+      "dependents": [
+        "app-context-retrieval"
+      ],
+      "interfaces": [
+        "context-retrievalRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-drift-detection",
+      "name": "Drift Detection Repository",
+      "purpose": "Owns persistence for drift detection entities behind the Drift Detection service.",
+      "tables": [
+        "drift-detection_records"
+      ],
+      "dependencies": [
+        "store-drift-detection"
+      ],
+      "dependents": [
+        "app-drift-detection"
+      ],
+      "interfaces": [
+        "drift-detectionRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-impact-analysis",
+      "name": "Impact Analysis Repository",
+      "purpose": "Owns persistence for impact analysis entities behind the Impact Analysis service.",
+      "tables": [
+        "impact-analysis_records"
+      ],
+      "dependencies": [
+        "store-impact-analysis"
+      ],
+      "dependents": [
+        "app-impact-analysis"
+      ],
+      "interfaces": [
+        "impact-analysisRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
+      ],
+      "sourceLocations": []
+    },
+    {
+      "id": "data-verification",
+      "name": "Verification Repository",
+      "purpose": "Owns persistence for verification entities behind the Verification service.",
+      "tables": [
+        "verification_records"
+      ],
+      "dependencies": [
+        "store-verification"
+      ],
+      "dependents": [
+        "app-verification"
+      ],
+      "interfaces": [
+        "verificationRepository"
+      ],
+      "failureModes": [
+        "Deadlocks / contention",
+        "Partial writes"
       ],
       "sourceLocations": []
     }

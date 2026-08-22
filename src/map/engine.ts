@@ -1,4 +1,4 @@
-import type { Component, Map, Relationship, Workflow } from '../core/types';
+import type { Component, DataStore, Map, Relationship, Service, Workflow } from '../core/types';
 
 export function createMap(projectName: string, projectId: string): Map {
   const now = new Date().toISOString();
@@ -32,6 +32,28 @@ export function addComponent(map: Map, component: Component): Map {
     };
   }
   return { ...map, components: [...map.components, component] };
+}
+
+export function addService(map: Map, service: Service): Map {
+  const existing = map.services.find((s) => s.id === service.id);
+  if (existing) {
+    return {
+      ...map,
+      services: map.services.map((s) => (s.id === service.id ? service : s))
+    };
+  }
+  return { ...map, services: [...map.services, service] };
+}
+
+export function addDataStore(map: Map, store: DataStore): Map {
+  const existing = map.dataStores.find((d) => d.id === store.id);
+  if (existing) {
+    return {
+      ...map,
+      dataStores: map.dataStores.map((d) => (d.id === store.id ? store : d))
+    };
+  }
+  return { ...map, dataStores: [...map.dataStores, store] };
 }
 
 export function addRelationship(map: Map, relationship: Relationship): Map {
